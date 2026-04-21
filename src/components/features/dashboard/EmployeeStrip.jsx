@@ -1,0 +1,105 @@
+import React, { useMemo } from "react";
+import Card from "../../common/Card";
+
+// Generate a consistent color avatar for a name
+const getAvatarColor = (name = "") => {
+  const colors = [
+    ["#3b82f6", "#1d4ed8"], // blue
+    ["#8b5cf6", "#6d28d9"], // violet
+    ["#06b6d4", "#0891b2"], // cyan
+    ["#10b981", "#059669"], // emerald
+    ["#f59e0b", "#d97706"], // amber
+    ["#ef4444", "#dc2626"], // red
+    ["#ec4899", "#db2777"], // pink
+    ["#6366f1", "#4f46e5"], // indigo
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+};
+
+const getInitials = (name = "") => {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+// Deterministically decide "online" status – employees with recent activity are online
+const isOnline = (name, records) => {
+  const today = new Date();
+  const threeDays = 3 * 24 * 60 * 60 * 1000;
+  return records.some((r) => {
+    const match =
+      r.requester?.toLowerCase().includes(name.split(" ")[0]?.toLowerCase()) ||
+      r.officer?.toLowerCase().includes(name.split(" ")[0]?.toLowerCase());
+    if (!match) return false;
+    const diff = today - new Date(r.ictdate);
+    return diff <= threeDays;
+  });
+};
+
+const EmployeeStrip = ({ records = [] }) => {
+  const employees = useMemo(() => {
+    const nameSet = new Set();
+    const list = [];
+    records.forEach((r) => {
+      const name = r.officer || r.requester || "";
+      if (name && !nameSet.has(name)) {
+        nameSet.add(name);
+        list.push(name);
+      }
+    });
+    return list.slice(0, 20); // cap at 20
+  }, [records]);
+
+  if (employees.length === 0) return null;
+
+  return (
+    <Card className="mb-4 overflow-hidden" padding={false}>
+      <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          Team Members
+        </h3>
+        <span className="text-xs text-slate-400 dark:text-slate-500">
+          {employees.length} employees
+        </span>
+      </div>
+      <div className="px-4 py-3 flex items-center gap-4 overflow-x-auto scrollbar-thin">
+        {employees.map((name) => {
+          const online = isOnline(name, records);
+          const [from, to] = getAvatarColor(name);
+          const initials = getInitials(name);
+          const shortName = name.split(" ")[0];
+          return (
+            <div
+              key={name}
+              className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group"
+            >
+              {/* Avatar container */}
+              <div className="relative">
+                <div
+                  className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md group-hover:scale-105 transition-transform duration-200 ring-2 ring-white dark:ring-slate-800"
+                  style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+                >
+                  {initials}
+                </div>
+                {/* Online indicator - TikTok style green dot top-right */}
+                <span
+                  className={`absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-800 ${
+                    online ? "bg-green-400 shadow-green-400/50 shadow-sm" : "bg-slate-400"
+                  }`}
+                />
+              </div>
+              {/* Name */}
+              <span className="text-xs text-slate-600 dark:text-slate-400 truncate max-w-[52px] text-center leading-tight">
+                {shortName}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+};
+
+export default EmployeeStrip;
