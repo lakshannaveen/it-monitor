@@ -13,6 +13,7 @@ const TaskDetailsPage = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [availability, setAvailability] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -33,11 +34,45 @@ const TaskDetailsPage = () => {
     return () => (mounted = false);
   }, [serviceNo]);
 
+  useEffect(() => {
+    let mounted = true;
+    const loadAvailability = async () => {
+      try {
+        const av = await barcodeService.getAvailability(serviceNo);
+        if (!mounted) return;
+        setAvailability(av || null);
+      } catch (e) {
+        console.warn("Failed to load availability", e);
+      }
+    };
+    if (serviceNo) loadAvailability();
+    return () => (mounted = false);
+  }, [serviceNo]);
+
+  const formatTime = (s) => {
+    if (!s) return "-";
+    try {
+      const d = new Date(s);
+      if (isNaN(d)) return s;
+      return d.toLocaleString();
+    } catch {
+      return s;
+    }
+  };
+
   return (
     <div>
       <div className="mb-5 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Tasks for {name || serviceNo}</h1>
-        <div className="text-sm text-slate-500">Service No: {serviceNo}</div>
+        <div className="text-sm text-slate-500 text-right">
+          <div>Service No: {serviceNo}</div>
+          {availability && String(availability.Status || "").toLowerCase().includes("available") && (
+            <div className="mt-1 text-xs text-slate-500">
+              <div>In: {formatTime(availability.InTime)}</div>
+              <div>Out: {availability.OutTime ? formatTime(availability.OutTime) : "-"}</div>
+            </div>
+          )}
+        </div>
       </div>
 
       <Card>
