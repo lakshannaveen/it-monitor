@@ -3,6 +3,7 @@ import api from "./api";
 const ENDPOINTS = {
   getBarcodeTimes: "/ProgressMonitoring/GetBarcodeTimes",
   getITOEmployees: "/ProgressMonitoring/GetITOEmployee",
+  getTaskDetails: "/ProgressMonitoring/GetTaskDetails",
 };
 
 export const barcodeService = {
@@ -15,6 +16,14 @@ export const barcodeService = {
     const response = await api.get(ENDPOINTS.getITOEmployees);
     // Expected shape: { StatusCode, Result, ResultSet: [{ Name }] }
     const set = response.data?.ResultSet || [];
-    return set.map((r) => r?.Name).filter(Boolean);
+    // Return full objects so callers can use Service_No
+    return set.map((r) => ({ Name: r?.Name, Service_No: r?.Service_No }));
+  },
+  getTaskDetails: async (serviceNo, year = new Date().getFullYear()) => {
+    if (!serviceNo) return [];
+    const response = await api.get(ENDPOINTS.getTaskDetails, {
+      params: { serviceno: serviceNo, year },
+    });
+    return response.data?.ResultSet || [];
   },
 };
