@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import Card from "../../common/Card";
+import { barcodeService } from "../../../services/barcodeService";
 
 // Generate a consistent color avatar for a name
 const getAvatarColor = (name = "") => {
@@ -39,9 +40,27 @@ const isOnline = (name, records) => {
 };
 
 const EmployeeStrip = ({ records = [] }) => {
+  const [apiEmployees, setApiEmployees] = useState([]);
+
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const names = await barcodeService.getITOEmployees();
+        if (mounted) setApiEmployees(names || []);
+      } catch (e) {
+        // ignore errors – this is non-critical visual enhancement
+        console.warn("Failed to load API employees", e);
+      }
+    };
+    load();
+    return () => (mounted = false);
+  }, []);
+
   const employees = useMemo(() => {
     const nameSet = new Set();
     const list = [];
+    // include names from records first
     records.forEach((r) => {
       const name = r.officer || r.requester || "";
       if (name && !nameSet.has(name)) {
@@ -49,8 +68,15 @@ const EmployeeStrip = ({ records = [] }) => {
         list.push(name);
       }
     });
+    // then include names from API (avoid duplicates)
+    apiEmployees.forEach((n) => {
+      if (n && !nameSet.has(n)) {
+        nameSet.add(n);
+        list.push(n);
+      }
+    });
     return list.slice(0, 20); // cap at 20
-  }, [records]);
+  }, [records, apiEmployees]);
 
   if (employees.length === 0) return null;
 
