@@ -20,6 +20,19 @@ export const barcodeService = {
     // Return full objects so callers can use Service_No
     return set.map((r) => ({ Name: r?.Name, Service_No: r?.Service_No }));
   },
+  getAvailability: async (serviceNo) => {
+    if (!serviceNo) return null;
+    try {
+      const response = await api.get("/ProgressMonitoring/GetAvailability", {
+        params: { serviceno: serviceNo },
+      });
+      // API returns { StatusCode, Result, ResultSet }
+      return response.data?.ResultSet || null;
+    } catch (e) {
+      console.warn("Failed to fetch availability for", serviceNo, e);
+      return null;
+    }
+  },
   getTaskDetails: async (serviceNo, year = new Date().getFullYear()) => {
     if (!serviceNo) return [];
     const response = await api.get(ENDPOINTS.getTaskDetails, {

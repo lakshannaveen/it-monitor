@@ -43,6 +43,7 @@ const isOnline = (name, records) => {
 const EmployeeStrip = ({ records = [] }) => {
   const [apiEmployees, setApiEmployees] = useState([]);
   const [imgStatus, setImgStatus] = useState({});
+  const [availability, setAvailability] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,6 +62,35 @@ const EmployeeStrip = ({ records = [] }) => {
 
   // Use API-provided employees only (no record-derived names)
   const employees = apiEmployees.slice(0, 20);
+
+  // Fetch availability for displayed employees
+  useEffect(() => {
+    let mounted = true;
+    const loadAvailability = async () => {
+      try {
+        const entries = await Promise.all(
+          employees.map(async (emp) => {
+            const svc = emp?.Service_No;
+            if (!svc) return [svc, null];
+            const res = await barcodeService.getAvailability(svc);
+            const status = (res && res.Status) || "";
+            const isAvail = String(status).toLowerCase().includes("available");
+            return [svc, isAvail];
+          })
+        );
+        if (!mounted) return;
+        const map = {};
+        entries.forEach(([svc, val]) => {
+          if (svc) map[svc] = Boolean(val);
+        });
+        setAvailability(map);
+      } catch (e) {
+        console.warn("Failed to load availability", e);
+      }
+    };
+    if (employees.length > 0) loadAvailability();
+    return () => (mounted = false);
+  }, [employees]);
 
   const openTasksFor = (employee) => {
     // navigate to task details page and include employee name in query
@@ -90,6 +120,9 @@ const EmployeeStrip = ({ records = [] }) => {
           const imgUrl = svc ? barcodeService.getUserImageUrl(svc) : null;
           const loaded = imgStatus[svc] === true;
           const shortName = name.split(" ")[0];
+          const isAvailable = availability.hasOwnProperty(svc)
+            ? availability[svc]
+            : online;
           return (
             <div
               key={emp?.Service_No || name}
@@ -117,7 +150,7 @@ const EmployeeStrip = ({ records = [] }) => {
                 {/* Online indicator - TikTok style green dot top-right */}
                 <span
                   className={`absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-800 ${
-                    online ? "bg-green-400 shadow-green-400/50 shadow-sm" : "bg-slate-400"
+                    isAvailable ? "bg-green-400 shadow-green-400/50 shadow-sm" : "bg-slate-400"
                   }`}
                 />
               </div>
