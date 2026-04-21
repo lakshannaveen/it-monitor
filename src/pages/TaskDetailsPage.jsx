@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import Card from "../components/common/Card";
+import Badge from "../components/common/Badge";
+import { STATUS_COLORS } from "../utils/constants";
 import { barcodeService } from "../services/barcodeService";
 
 const TaskDetailsPage = () => {
@@ -51,7 +53,22 @@ const TaskDetailsPage = () => {
               <div key={i} className="border rounded-lg p-3 bg-slate-50 dark:bg-slate-700">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{t.Task}</div>
-                  <div className="text-xs text-slate-500">{t.Status || "-"}</div>
+                  <div className="text-xs">
+                    {t.Status ? (
+                      <Badge
+                        label={t.Status}
+                        color={(() => {
+                          const s = String(t.Status || "");
+                          const entry = Object.keys(STATUS_COLORS).find((k) =>
+                            s.toLowerCase().includes(k.toLowerCase())
+                          );
+                          return entry ? STATUS_COLORS[entry] : "slate";
+                        })()}
+                      />
+                    ) : (
+                      <div className="text-slate-500">-</div>
+                    )}
+                  </div>
                 </div>
                 <div className="text-xs text-slate-500 mt-1">
                   <div>Job Type: {t.JobType || "-"} — Ref: {t.ReferenceNo || "-"}</div>
