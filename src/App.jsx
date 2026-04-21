@@ -8,6 +8,7 @@ import DashboardPage from "./pages/DashboardPage";
 import BarcodePage from "./pages/BarcodePage";
 import ReportsPage from "./pages/ReportsPage";
 import SettingsPage from "./pages/SettingsPage";
+import TaskDetailsPage from "./pages/TaskDetailsPage";
 import NotFoundPage from "./pages/404NotFound";
 
 const Layout = ({ children }) => {
@@ -50,6 +51,7 @@ const AppContent = () => {
           <Route path="/barcode"  element={<BarcodePage />} />
           <Route path="/reports"  element={<ReportsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/tasks/:serviceNo" element={<TaskDetailsPage />} />
           <Route path="*"         element={<NotFoundPage />} />
         </Routes>
       </Layout>

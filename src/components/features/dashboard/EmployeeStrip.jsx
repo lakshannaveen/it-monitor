@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Card from "../../common/Card";
-import Modal from "../../common/Modal";
 import { barcodeService } from "../../../services/barcodeService";
 
 // Generate a consistent color avatar for a name
@@ -42,11 +42,7 @@ const isOnline = (name, records) => {
 
 const EmployeeStrip = ({ records = [] }) => {
   const [apiEmployees, setApiEmployees] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [tasks, setTasks] = useState([]);
-  const [tasksLoading, setTasksLoading] = useState(false);
-  const [tasksError, setTasksError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
@@ -65,21 +61,10 @@ const EmployeeStrip = ({ records = [] }) => {
   // Use API-provided employees only (no record-derived names)
   const employees = apiEmployees.slice(0, 20);
 
-  const openTasksFor = async (employee) => {
-    setSelectedEmployee(employee);
-    setIsModalOpen(true);
-    setTasks([]);
-    setTasksError(null);
-    setTasksLoading(true);
-    try {
-      const set = await barcodeService.getTaskDetails(employee?.Service_No);
-      setTasks(set || []);
-    } catch (e) {
-      console.error("Failed to load tasks", e);
-      setTasksError("Failed to load tasks");
-    } finally {
-      setTasksLoading(false);
-    }
+  const openTasksFor = (employee) => {
+    // navigate to task details page and include employee name in query
+    const name = employee?.Name || "";
+    navigate(`/tasks/${employee?.Service_No}?name=${encodeURIComponent(name)}`);
   };
 
   if (employees.length === 0) return null;
@@ -130,41 +115,7 @@ const EmployeeStrip = ({ records = [] }) => {
           );
         })}
       </div>
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedEmployee(null);
-          setTasks([]);
-          setTasksError(null);
-        }}
-        title={selectedEmployee ? `${selectedEmployee.Name} — Tasks` : "Tasks"}
-        size="lg"
-      >
-        {tasksLoading ? (
-          <div className="text-sm text-slate-500">Loading tasks…</div>
-        ) : tasksError ? (
-          <div className="text-sm text-red-500">{tasksError}</div>
-        ) : tasks.length === 0 ? (
-          <div className="text-sm text-slate-500">No tasks found.</div>
-        ) : (
-          <div className="space-y-3">
-            {tasks.map((t, i) => (
-              <div key={i} className="border rounded-lg p-3 bg-slate-50 dark:bg-slate-700">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{t.Task}</div>
-                  <div className="text-xs text-slate-500">{t.Status || "-"}</div>
-                </div>
-                <div className="text-xs text-slate-500 mt-1">
-                  <div>Job Type: {t.JobType || "-"} — Ref: {t.ReferenceNo || "-"}</div>
-                  <div>Planned: {t.PlannedStartDate || "-"} → {t.PlannedCompletionDate || "-"}</div>
-                  <div>Hours: {t.HoursTaken || "0"}/{t.HoursAllocated || "-"}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </Modal>
+      {/* Navigation to task details page handled on click */}
     </Card>
   );
 };
