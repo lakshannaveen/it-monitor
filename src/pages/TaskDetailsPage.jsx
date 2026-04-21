@@ -117,51 +117,37 @@ const TaskDetailsPage = () => {
             No tasks found.
           </div>
         ) : (
-          <div className="space-y-4">
-            {tasks.map((t, i) => (
-              <article
-                key={i}
-                className="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/60"
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <h2 className="text-lg font-semibold leading-snug text-slate-900 dark:text-slate-100 sm:pr-4">
-                    {t.Task || "Untitled task"}
-                  </h2>
-                  <div className="text-xs sm:shrink-0">
-                    {t.Status ? (
-                      <Badge label={t.Status} color={getStatusColor(t.Status)} className="font-semibold" />
-                    ) : (
-                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-700/50 dark:text-slate-300">
-                        -
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-                  <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/60">
-                    <div className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Job Type</div>
-                    <div className="mt-0.5 font-medium text-slate-700 dark:text-slate-200">{t.JobType || "-"}</div>
-                  </div>
-                  <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/60">
-                    <div className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Reference</div>
-                    <div className="mt-0.5 font-medium text-slate-700 dark:text-slate-200">{t.ReferenceNo || "-"}</div>
-                  </div>
-                  <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/60 sm:col-span-2">
-                    <div className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Planned</div>
-                    <div className="mt-0.5 font-medium text-slate-700 dark:text-slate-200">
-                      {t.PlannedStartDate || "-"} -&gt; {t.PlannedCompletionDate || "-"}
-                    </div>
-                  </div>
-                  <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/60 sm:col-span-2">
-                    <div className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Hours</div>
-                    <div className="mt-0.5 font-medium text-slate-700 dark:text-slate-200">
-                      {t.HoursTaken || "0"} / {t.HoursAllocated || "-"}
-                    </div>
-                  </div>
-                </div>
-              </article>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs text-slate-500 uppercase tracking-wider">
+                  <th className="px-4 py-3">Task</th>
+                  <th className="px-4 py-3">Job Type</th>
+                  <th className="px-4 py-3">Reference</th>
+                  <th className="px-4 py-3">Planned</th>
+                  <th className="px-4 py-3">Hours</th>
+                  <th className="px-4 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {tasks.map((t, i) => (
+                  <tr key={i} className="bg-white dark:bg-slate-800">
+                    <td className="px-4 py-4 align-top">
+                      <div className="font-medium text-slate-800 dark:text-slate-100">{t.Task || "Untitled task"}</div>
+                    </td>
+                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">{t.JobType || "-"}</td>
+                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">{t.ReferenceNo || "-"}</td>
+                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
+                      {t.PlannedStartDate || "-"} &rarr; {t.PlannedCompletionDate || "-"}
+                    </td>
+                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">{t.HoursTaken || 0} / {t.HoursAllocated || "-"}</td>
+                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
+                      {t.Status ? <Badge label={t.Status} color={getStatusColor(t.Status)} /> : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </Card>

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Card from "../../common/Card";
 import Badge from "../../common/Badge";
 import { barcodeService } from "../../../services/barcodeService";
@@ -86,6 +87,7 @@ const EmployeeStrip = ({ records = [] }) => {
   const activeTasks = activeServiceNo ? tasksByEmployee[activeServiceNo] || [] : [];
   const activeTaskLoading = activeServiceNo ? Boolean(tasksLoading[activeServiceNo]) : false;
   const activeTaskError = activeServiceNo ? tasksError[activeServiceNo] : null;
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (employees.length === 0) return;
@@ -204,7 +206,18 @@ const EmployeeStrip = ({ records = [] }) => {
       </div>
 
       <div className="p-4 grid grid-cols-1 lg:grid-cols-[240px,1fr] gap-4">
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 bg-slate-50/70 dark:bg-slate-900/40">
+        <div
+          className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 bg-slate-50/70 dark:bg-slate-900/40"
+          // make the profile area clickable when a service number exists
+          onClick={() => {
+            const svc = activeEmployee?.Service_No;
+            const name = activeEmployee?.Name || "";
+            if (svc) navigate(`/tasks/${svc}`, { state: { name } });
+          }}
+          role={activeEmployee?.Service_No ? "button" : undefined}
+          aria-label={activeEmployee ? `Open tasks for ${activeEmployee.Name}` : undefined}
+          style={{ cursor: activeEmployee?.Service_No ? "pointer" : "default" }}
+        >
           {activeEmployee && (() => {
             const name = activeEmployee?.Name || "";
             const [from, to] = getAvatarColor(name);
