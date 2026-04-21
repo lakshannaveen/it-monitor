@@ -4,6 +4,7 @@ const ENDPOINTS = {
   getBarcodeTimes: "/ProgressMonitoring/GetBarcodeTimes",
   getITOEmployees: "/ProgressMonitoring/GetITOEmployee",
   getTaskDetails: "/ProgressMonitoring/GetTaskDetails",
+  getUserImg: "/ProgressMonitoring/GetUserImg",
 };
 
 export const barcodeService = {
@@ -25,5 +26,12 @@ export const barcodeService = {
       params: { serviceno: serviceNo, year },
     });
     return response.data?.ResultSet || [];
+  },
+  getUserImageUrl: (serviceNo) => {
+    if (!serviceNo) return null;
+    const base = api.defaults.baseURL || process.env.REACT_APP_BASE_URL || "";
+    // Ensure no trailing slash
+    const prefix = base.replace(/\/$/, "");
+    return `${prefix}${ENDPOINTS.getUserImg}?serviceNo=${encodeURIComponent(serviceNo)}`;
   },
 };

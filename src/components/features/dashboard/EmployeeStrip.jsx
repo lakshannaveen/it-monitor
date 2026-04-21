@@ -42,6 +42,7 @@ const isOnline = (name, records) => {
 
 const EmployeeStrip = ({ records = [] }) => {
   const [apiEmployees, setApiEmployees] = useState([]);
+  const [imgStatus, setImgStatus] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -85,6 +86,9 @@ const EmployeeStrip = ({ records = [] }) => {
           const online = isOnline(name, records);
           const [from, to] = getAvatarColor(name);
           const initials = getInitials(name);
+          const svc = emp?.Service_No;
+          const imgUrl = svc ? barcodeService.getUserImageUrl(svc) : null;
+          const loaded = imgStatus[svc] === true;
           const shortName = name.split(" ")[0];
           return (
             <div
@@ -94,11 +98,21 @@ const EmployeeStrip = ({ records = [] }) => {
             >
               {/* Avatar container */}
               <div className="relative">
-                <div
-                  className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md group-hover:scale-105 transition-transform duration-200 ring-2 ring-white dark:ring-slate-800"
-                  style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
-                >
-                  {initials}
+                <div className="w-11 h-11 rounded-full overflow-hidden relative shadow-md group-hover:scale-105 transition-transform duration-200 ring-2 ring-white dark:ring-slate-800" style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}>
+                  {imgUrl && (
+                    <img
+                      src={imgUrl}
+                      alt={name}
+                      onLoad={() => setImgStatus((s) => ({ ...s, [svc]: true }))}
+                      onError={() => setImgStatus((s) => ({ ...s, [svc]: false }))}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      style={{ display: imgStatus[svc] === false ? "none" : "block" }}
+                    />
+                  )}
+                  {/* Initials shown when image not loaded */}
+                  <div className={`w-full h-full flex items-center justify-center text-white text-sm font-bold ${loaded ? "hidden" : "block"}`}>
+                    {initials}
+                  </div>
                 </div>
                 {/* Online indicator - TikTok style green dot top-right */}
                 <span
