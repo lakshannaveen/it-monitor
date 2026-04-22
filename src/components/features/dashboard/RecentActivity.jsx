@@ -158,80 +158,24 @@ const InProgressSummary = ({ records }) => {
 };
 
 const RecentActivity = ({ records }) => {
-  const [tab, setTab] = useState("recent");
-  const recent = [...records].slice(0, 8);
   const inProgressCount = useMemo(() => records.filter(isInProgress).length, [records]);
 
   return (
     <Card padding={false} className="h-full flex flex-col">
       <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center gap-1">
-        <button
-          onClick={() => setTab("recent")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-            tab === "recent"
-              ? "bg-blue-600 text-white shadow-sm"
-              : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
-          }`}
-        >
-          Recent Activity
-        </button>
-        <button
-          onClick={() => setTab("inprogress")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
-            tab === "inprogress"
-              ? "bg-blue-600 text-white shadow-sm"
-              : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
-          }`}
-        >
+        <div className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white shadow-sm flex items-center gap-1.5">
           In Progress
           {inProgressCount > 0 && (
-            <span
-              className={`rounded-full px-1.5 text-xs font-bold ${
-                tab === "inprogress"
-                  ? "bg-white/20 text-white"
-                  : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
-              }`}
-            >
+            <span className="rounded-full px-1.5 text-xs font-bold bg-white/20 text-white">
               {inProgressCount}
             </span>
           )}
-        </button>
+        </div>
       </div>
 
-      {tab === "recent" ? (
-        <ul className="divide-y divide-slate-100 dark:divide-slate-800 flex-1 overflow-y-auto">
-          {recent.length === 0 && (
-            <li className="px-5 py-8 text-center text-sm text-slate-400">No records</li>
-          )}
-          {recent.map((record, idx) => {
-            const name = record.officer || record.requester || "Unknown";
-            const serviceNo = getRecordServiceNo(record);
-            return (
-              <li
-                key={idx}
-                className="flex items-start gap-3 px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-              >
-                <Avatar name={name} serviceNo={serviceNo} size="sm" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{record.logdesc || "-"}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <Badge jobType={record.jobtype} />
-                    <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{name}</p>
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400">{formatDuration(record.reuhour)}</p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{formatDate(record.ictdate)}</p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <div className="flex-1 overflow-y-auto">
-          <InProgressSummary records={records} />
-        </div>
-      )}
+      <div className="flex-1 overflow-y-auto">
+        <InProgressSummary records={records} />
+      </div>
     </Card>
   );
 };
