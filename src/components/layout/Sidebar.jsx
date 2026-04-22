@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { LayoutDashboard, Layers, BarChart2, Settings, ChevronRight, X, PanelLeftClose } from "lucide-react";
+import { LayoutDashboard, Layers, BarChart2, ChevronRight, X, PanelLeftClose } from "lucide-react";
 import { selectSidebarOpen } from "../../store/selectors";
 import { setSidebarOpen } from "../../store/slices/uiSlice";
 
@@ -9,7 +9,6 @@ const navItems = [
   { to: "/",         icon: LayoutDashboard, label: "Dashboard"     },
   { to: "/barcode",  icon: Layers,          label: "Barcode Times" },
   { to: "/reports",  icon: BarChart2,        label: "Reports"       },
-  { to: "/settings", icon: Settings,         label: "Settings"      },
 ];
 
 const Sidebar = () => {
