@@ -43,6 +43,11 @@ const TaskDetailsPage = () => {
     return "slate";
   };
 
+  const isCompletedStatus = (status) => {
+    const s = String(status || "").toLowerCase();
+    return s.includes("complete") || s.includes("done") || s.includes("finish");
+  };
+
   const getRequestedByName = (value) => {
     const text = String(value || "").trim();
     if (!text) return "-";
@@ -63,6 +68,8 @@ const TaskDetailsPage = () => {
     return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
   };
 
+  const visibleTasks = tasks.filter((t) => !isCompletedStatus(t.Status));
+
   return (
     <div>
       <div className="mb-3">
@@ -80,7 +87,7 @@ const TaskDetailsPage = () => {
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-8 text-center text-sm text-red-600 dark:border-red-900/70 dark:bg-red-900/20 dark:text-red-300">
             {error}
           </div>
-        ) : tasks.length === 0 ? (
+        ) : visibleTasks.length === 0 ? (
           <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-400">
             No tasks found.
           </div>
@@ -97,10 +104,10 @@ const TaskDetailsPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {tasks.map((t, i) => (
+                {visibleTasks.map((t, i) => (
                   <tr key={i} className="bg-white dark:bg-slate-800">
                     <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-start">
                         <div className="relative w-9 h-9 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[11px] font-semibold text-slate-600 dark:text-slate-200 shrink-0">
                           {getRequestedByServiceNo(t.RequestedBy) && (
                             <img
@@ -113,11 +120,6 @@ const TaskDetailsPage = () => {
                             />
                           )}
                           <span>{getInitials(getRequestedByName(t.RequestedBy))}</span>
-                        </div>
-                        <div className="min-w-0">
-                          <div className="font-medium text-slate-700 dark:text-slate-200 truncate">
-                            {getRequestedByName(t.RequestedBy)}
-                          </div>
                         </div>
                       </div>
                     </td>
