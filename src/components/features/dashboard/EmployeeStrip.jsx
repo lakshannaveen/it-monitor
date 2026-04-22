@@ -100,7 +100,16 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
     };
   }, []);
 
-  const employees = useMemo(() => apiEmployees.slice(0, 20), [apiEmployees]);
+  const employees = useMemo(() => {
+    const list = apiEmployees.slice(0, 20);
+    const thIndex = list.findIndex((e) => String(e?.Name || "").trim().toUpperCase() === "THARANGA");
+    const malIndex = list.findIndex((e) => String(e?.Name || "").trim().toUpperCase() === "MALINDA");
+    if (thIndex === -1 || malIndex === -1) return list;
+    const [tharanga] = list.splice(thIndex, 1);
+    const insertAt = Math.min(malIndex + 1, list.length);
+    list.splice(insertAt, 0, tharanga);
+    return list;
+  }, [apiEmployees]);
   const activeEmployee = employees[selectedIndex] || null;
   const activeServiceNo = activeEmployee?.Service_No;
   const activeTasks = activeServiceNo ? tasksByEmployee[activeServiceNo] || [] : [];
