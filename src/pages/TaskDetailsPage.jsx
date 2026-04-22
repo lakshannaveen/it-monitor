@@ -108,7 +108,7 @@ const TaskDetailsPage = () => {
           <tr className="text-base text-slate-500 uppercase tracking-wider">
             <th className="px-4 py-4 text-center whitespace-nowrap">Requested By</th>
             <th className="px-4 py-4 text-center">Task</th>
-            <th className="px-4 py-4 text-center whitespace-nowrap">All Hours</th>
+            <th className="px-4 py-4 text-center whitespace-nowrap">Allocated Hours</th>
             <th className="px-4 py-4 text-center whitespace-nowrap">Actual Hours</th>
             <th className="px-4 py-4 text-center">Status</th>
           </tr>
@@ -211,8 +211,8 @@ const TaskDetailsPage = () => {
                 )}
               </div>
 
-              <div className="rounded-xl border border-amber-300 bg-amber-100/80 dark:border-amber-700/60 dark:bg-amber-900/20">
-                <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-amber-800 dark:text-amber-300">
+              <div className="rounded-xl border border-slate-200 bg-white/80 dark:border-slate-700 dark:bg-slate-800/40">
+                <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
                   Other Tasks
                 </h3>
                 {otherTasks.length > 0 ? (
