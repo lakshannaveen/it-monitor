@@ -76,21 +76,30 @@ const isInProgress = (record) => {
   return parseFloat(record.reuhour || 0) > 0;
 };
 
+const getRecordTime = (record) => {
+  const ts = new Date(record?.ictdate || 0).getTime();
+  return Number.isFinite(ts) ? ts : 0;
+};
+
 const groupByEmployee = (records) => {
   const map = {};
   records.filter(isInProgress).forEach((record) => {
     const name = record.officer || record.requester || "Unknown";
     const serviceNo = getRecordServiceNo(record);
     const key = serviceNo || name;
-    if (!map[key]) map[key] = { key, name, serviceNo, jobs: [] };
-    map[key].jobs.push(record);
+    if (!map[key]) {
+      map[key] = { key, name, serviceNo, record };
+      return;
+    }
+    if (getRecordTime(record) > getRecordTime(map[key].record)) {
+      map[key].record = record;
+    }
   });
-  return Object.values(map).sort((a, b) => b.jobs.length - a.jobs.length);
+  return Object.values(map).sort((a, b) => getRecordTime(b.record) - getRecordTime(a.record));
 };
 
 const InProgressSummary = ({ records }) => {
   const groups = useMemo(() => groupByEmployee(records), [records]);
-  const [expanded, setExpanded] = useState(null);
 
   if (groups.length === 0) {
     return (
@@ -102,54 +111,29 @@ const InProgressSummary = ({ records }) => {
 
   return (
     <div className="divide-y divide-slate-100 dark:divide-slate-800">
-      {groups.map(({ key, name, serviceNo, jobs }) => {
-        const totalHrs = jobs.reduce((sum, record) => sum + parseFloat(record.reuhour || 0), 0);
-        const isOpen = expanded === key;
+      {groups.map(({ key, name, serviceNo, record }) => {
         return (
           <div key={key}>
-            <button
-              onClick={() => setExpanded(isOpen ? null : key)}
-              className="w-full flex items-center gap-3 px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left"
-            >
+            <div className="w-full flex items-start gap-3 px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
               <Avatar name={name} serviceNo={serviceNo} size="sm" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{name}</p>
-                <p className="text-xs text-slate-400">
-                  {jobs.length} job{jobs.length !== 1 ? "s" : ""} · {formatDuration(totalHrs)}
-                </p>
+                <p className="text-xs text-slate-700 dark:text-slate-300 line-clamp-1 mt-0.5">{record.logdesc || "-"}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge jobType={record.jobtype} />
+                  <p className="text-xs text-slate-400">{formatDate(record.ictdate)}</p>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                   Active
                 </span>
-                <svg
-                  className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                  {formatDuration(record.reuhour)}
+                </span>
               </div>
-            </button>
-            {isOpen && (
-              <div className="bg-slate-50 dark:bg-slate-900/40 border-t border-slate-100 dark:border-slate-800">
-                {jobs.map((record, idx) => (
-                  <div key={idx} className="flex items-start gap-3 px-8 py-2.5 border-b border-slate-100 dark:border-slate-800 last:border-0">
-                    <Badge jobType={record.jobtype} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-slate-700 dark:text-slate-300 line-clamp-1">{record.logdesc || "-"}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{formatDate(record.ictdate)}</p>
-                    </div>
-                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                      {formatDuration(record.reuhour)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
+            </div>
           </div>
         );
       })}
@@ -158,7 +142,7 @@ const InProgressSummary = ({ records }) => {
 };
 
 const RecentActivity = ({ records }) => {
-  const inProgressCount = useMemo(() => records.filter(isInProgress).length, [records]);
+  const inProgressCount = useMemo(() => groupByEmployee(records).length, [records]);
 
   return (
     <Card padding={false} className="h-full flex flex-col">
