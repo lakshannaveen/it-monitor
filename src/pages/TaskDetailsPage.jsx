@@ -105,19 +105,19 @@ const TaskDetailsPage = () => {
     <div className="overflow-x-auto">
       <table className="min-w-full text-lg">
         <thead>
-          <tr className="text-left text-base text-slate-500 uppercase tracking-wider">
-            <th className="px-4 py-4">Requested By</th>
-            <th className="px-4 py-4">Task</th>
-            <th className="px-4 py-4 whitespace-nowrap">All Hours</th>
-            <th className="px-4 py-4 whitespace-nowrap">Actual Hours</th>
-            <th className="px-4 py-4">Status</th>
+          <tr className="text-base text-slate-500 uppercase tracking-wider">
+            <th className="px-4 py-4 text-center">Requested By</th>
+            <th className="px-4 py-4 text-center">Task</th>
+            <th className="px-4 py-4 text-center whitespace-nowrap">All Hours</th>
+            <th className="px-4 py-4 text-center whitespace-nowrap">Actual Hours</th>
+            <th className="px-4 py-4 text-center">Status</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
           {list.map((t, i) => (
             <tr key={i} className="bg-white dark:bg-slate-800">
-              <td className="px-4 py-6 align-top text-slate-600 dark:text-slate-300">
-                <div className="flex items-start">
+              <td className="px-4 py-6 align-top text-center text-slate-600 dark:text-slate-300">
+                <div className="flex justify-center">
                   <div className="relative w-16 h-16 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-base font-semibold text-slate-600 dark:text-slate-200 shrink-0">
                     {getRequestedByServiceNo(t.RequestedBy) && (
                       <img
@@ -136,10 +136,10 @@ const TaskDetailsPage = () => {
               <td className="px-4 py-6 align-top">
                 <div className="font-medium text-xl leading-8 text-slate-800 dark:text-slate-100">{t.Task || "Untitled task"}</div>
               </td>
-              <td className="px-4 py-6 align-top text-slate-700 dark:text-slate-200 whitespace-nowrap tabular-nums font-medium text-xl">
+              <td className="px-4 py-6 align-top text-center text-slate-700 dark:text-slate-200 whitespace-nowrap tabular-nums font-medium text-xl">
                 {t.HoursAllocated || "-"}
               </td>
-              <td className="px-4 py-6 align-top text-slate-700 dark:text-slate-200 whitespace-nowrap tabular-nums font-medium text-xl">
+              <td className="px-4 py-6 align-top text-center text-slate-700 dark:text-slate-200 whitespace-nowrap tabular-nums font-medium text-xl">
                 {t.HoursTaken || 0}
               </td>
               <td className="px-4 py-6 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap">
