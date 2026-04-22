@@ -200,7 +200,7 @@ const TaskDetailsPage = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              <div>
+              <div className="rounded-xl border border-slate-200 bg-white/80 dark:border-slate-700 dark:bg-slate-800/40">
                 <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
                   In Progress
                 </h3>
@@ -211,7 +211,7 @@ const TaskDetailsPage = () => {
                 )}
               </div>
 
-              <div className="border-t border-slate-200 dark:border-slate-800">
+              <div className="rounded-xl border border-slate-200 bg-white/80 dark:border-slate-700 dark:bg-slate-800/40">
                 <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
                   Other Tasks
                 </h3>
