@@ -76,6 +76,8 @@ const TaskDetailsPage = () => {
   const visibleTasks = tasks.filter((t) => !isCompletedStatus(t.Status));
   const inProgressTasks = visibleTasks.filter((t) => isInProgressStatus(t.Status));
   const otherTasks = visibleTasks.filter((t) => !isInProgressStatus(t.Status));
+  const profileImageUrl = serviceNo ? barcodeService.getUserImageUrl(serviceNo) : null;
+  const profileLabel = `${serviceNo} - ${name || "Unknown"}`;
 
   const renderTable = (list) => (
     <div className="overflow-x-auto">
@@ -130,51 +132,71 @@ const TaskDetailsPage = () => {
 
   return (
     <div>
-      <div className="mb-3">
-        <p className="text-xl font-semibold text-slate-800 dark:text-slate-100">
-          {serviceNo} - {name || "Unknown"}
+      <div className="mb-4">
+        <p className="text-2xl font-semibold text-slate-800 dark:text-slate-100">
+          {profileLabel}
         </p>
       </div>
 
-      <Card className="bg-gradient-to-b from-white to-slate-50/60 dark:from-slate-900 dark:to-slate-900/70">
-        {loading ? (
-          <div className="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-400">
-            Loading tasks...
-          </div>
-        ) : error ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-8 text-center text-sm text-red-600 dark:border-red-900/70 dark:bg-red-900/20 dark:text-red-300">
-            {error}
-          </div>
-        ) : visibleTasks.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-400">
-            No tasks found.
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div>
-              <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                In Progress
-              </h3>
-              {inProgressTasks.length > 0 ? (
-                renderTable(inProgressTasks)
-              ) : (
-                <div className="px-4 pb-4 text-sm text-slate-500 dark:text-slate-400">No in-progress tasks.</div>
+      <div className="grid grid-cols-1 xl:grid-cols-[320px,1fr] gap-4 items-start">
+        <Card className="h-full min-h-[640px] bg-gradient-to-b from-white to-slate-50/60 dark:from-slate-900 dark:to-slate-900/70">
+          <div className="h-full flex flex-col items-center text-center">
+            <div className="relative w-48 h-48 rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-4xl font-bold text-slate-600 dark:text-slate-200 shrink-0 mt-4">
+              {profileImageUrl && (
+                <img
+                  src={profileImageUrl}
+                  alt={profileLabel}
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
               )}
+              <span>{getInitials(name || serviceNo)}</span>
             </div>
+          </div>
+        </Card>
 
-            <div className="border-t border-slate-200 dark:border-slate-800">
-              <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                Other Tasks
-              </h3>
-              {otherTasks.length > 0 ? (
-                renderTable(otherTasks)
-              ) : (
-                <div className="px-4 pb-4 text-sm text-slate-500 dark:text-slate-400">No other tasks.</div>
-              )}
+        <Card className="bg-gradient-to-b from-white to-slate-50/60 dark:from-slate-900 dark:to-slate-900/70">
+          {loading ? (
+            <div className="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-400">
+              Loading tasks...
             </div>
-          </div>
-        )}
-      </Card>
+          ) : error ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-8 text-center text-sm text-red-600 dark:border-red-900/70 dark:bg-red-900/20 dark:text-red-300">
+              {error}
+            </div>
+          ) : visibleTasks.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-400">
+              No tasks found.
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div>
+                <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  In Progress
+                </h3>
+                {inProgressTasks.length > 0 ? (
+                  renderTable(inProgressTasks)
+                ) : (
+                  <div className="px-4 pb-4 text-sm text-slate-500 dark:text-slate-400">No in-progress tasks.</div>
+                )}
+              </div>
+
+              <div className="border-t border-slate-200 dark:border-slate-800">
+                <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  Other Tasks
+                </h3>
+                {otherTasks.length > 0 ? (
+                  renderTable(otherTasks)
+                ) : (
+                  <div className="px-4 pb-4 text-sm text-slate-500 dark:text-slate-400">No other tasks.</div>
+                )}
+              </div>
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
 };
