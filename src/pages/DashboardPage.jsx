@@ -2,7 +2,6 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { selectStats, selectGroupedByJobType, selectAllRecords, selectLoading, selectError } from "../store/selectors";
 import { useFetch } from "../hooks/useFetch";
-import Navigation from "../components/layout/Navigation";
 import JobTypeChart from "../components/features/dashboard/JobTypeChart";
 import RecentActivity from "../components/features/dashboard/RecentActivity";
 import EmployeeStrip from "../components/features/dashboard/EmployeeStrip";
@@ -22,8 +21,6 @@ const DashboardPage = () => {
 
   return (
     <div className="animate-fade-in">
-      <Navigation />
-
       {/* Section A – Employee Strip */}
       <EmployeeStrip records={records} stats={stats} />
 
