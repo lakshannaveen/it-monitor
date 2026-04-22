@@ -13,6 +13,7 @@ const TaskDetailsPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [availability, setAvailability] = useState(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -59,6 +60,17 @@ const TaskDetailsPage = () => {
     }
   };
 
+  const getInitials = (fullName = "") => {
+    const parts = String(fullName || "").trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return "NA";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  };
+
+  const isAvailable = String(availability?.Status || "").toLowerCase().includes("available");
+  const imageUrl = serviceNo ? barcodeService.getUserImageUrl(serviceNo) : null;
+  const displayName = name || serviceNo;
+
   const getStatusColor = (status) => {
     const s = String(status || "").toLowerCase();
     if (!s) return "slate";
@@ -92,14 +104,33 @@ const TaskDetailsPage = () => {
             </span>
           </div>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-right text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
-          <div className="font-medium text-slate-700 dark:text-slate-300">Service No: {serviceNo}</div>
-          {availability && String(availability.Status || "").toLowerCase().includes("available") && (
-            <div className="mt-1 text-xs">
-              <div>In: {formatTime(availability.InTime)}</div>
-              <div>Out: {availability.OutTime ? formatTime(availability.OutTime) : "-"}</div>
+        <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 min-w-[240px]">
+          <div className="flex items-center gap-3">
+            <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs font-semibold text-slate-600 dark:text-slate-200">
+              {imageUrl && (
+                <img
+                  src={imageUrl}
+                  alt={displayName}
+                  onLoad={() => setImgLoaded(true)}
+                  onError={() => setImgLoaded(false)}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{ opacity: imgLoaded ? 1 : 0, transition: "opacity 200ms ease-in-out" }}
+                />
+              )}
+              <span style={{ opacity: imgLoaded ? 0 : 1, transition: "opacity 200ms ease-in-out" }}>
+                {getInitials(displayName)}
+              </span>
             </div>
-          )}
+            <div className="min-w-0">
+              <div className="font-medium text-slate-700 dark:text-slate-300 truncate">Service No: {serviceNo}</div>
+              <div className={`text-xs mt-0.5 ${isAvailable ? "text-green-600 dark:text-green-400" : "text-slate-500 dark:text-slate-400"}`}>
+                {isAvailable ? "Available" : "Not available"}
+              </div>
+            </div>
+          </div>
+          <div className="mt-2 text-xs">
+            In: {availability?.InTime ? formatTime(availability.InTime) : "-"}
+          </div>
         </div>
       </div>
 
