@@ -106,7 +106,7 @@ const TaskDetailsPage = () => {
       <table className="min-w-full text-lg">
         <thead>
           <tr className="text-base text-slate-500 uppercase tracking-wider">
-            <th className="px-4 py-4 text-center">Requested By</th>
+            <th className="px-4 py-4 text-center whitespace-nowrap">Requested By</th>
             <th className="px-4 py-4 text-center">Task</th>
             <th className="px-4 py-4 text-center whitespace-nowrap">All Hours</th>
             <th className="px-4 py-4 text-center whitespace-nowrap">Actual Hours</th>
