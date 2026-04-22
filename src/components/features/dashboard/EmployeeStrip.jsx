@@ -13,7 +13,6 @@ const STATUS_COLORS = {
   Completed: "#10b981",
 };
 
-const CAROUSEL_MS = 30 * 1000;
 const TASK_REFRESH_MS = 30 * 1000;
 
 const getAvatarColor = (name = "") => {
@@ -134,14 +133,6 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
     if (employees.length === 0) return;
     if (selectedIndex > employees.length - 1) setSelectedIndex(0);
   }, [employees, selectedIndex]);
-
-  useEffect(() => {
-    if (employees.length <= 1) return undefined;
-    const timer = setInterval(() => {
-      setSelectedIndex((prev) => (prev + 1) % employees.length);
-    }, CAROUSEL_MS);
-    return () => clearInterval(timer);
-  }, [employees.length]);
 
   useEffect(() => {
     let mounted = true;
