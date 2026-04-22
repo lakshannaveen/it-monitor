@@ -117,7 +117,7 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
     return {
       counts,
       total: activeTasks.length,
-      slices: buildPie(segments, 70, 70, 58),
+      slices: buildPie(segments, 95, 95, 80),
     };
   }, [activeTasks]);
 
@@ -264,17 +264,17 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
       </div>
 
       {stats && (
-        <div className="px-4 py-4 border-b border-slate-200 dark:border-slate-700">
+        <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatsCard label="Total Records" value={stats.total} icon={Layers} color="blue" sub="All job types" />
-            <StatsCard label="Hardware" value={stats.hardware} icon={Monitor} color="blue" sub="Hardware jobs" />
-            <StatsCard label="Software" value={stats.software} icon={Layers} color="indigo" sub="Software jobs" />
-            <StatsCard label="Total Hours" value={`${stats.totalHours}h`} icon={Clock} color="sky" sub="Reported hours" />
+            <StatsCard compact label="Total Records" value={stats.total} icon={Layers} color="blue" sub="All job types" />
+            <StatsCard compact label="Hardware" value={stats.hardware} icon={Monitor} color="blue" sub="Hardware jobs" />
+            <StatsCard compact label="Software" value={stats.software} icon={Layers} color="indigo" sub="Software jobs" />
+            <StatsCard compact label="Total Hours" value={`${stats.totalHours}h`} icon={Clock} color="sky" sub="Reported hours" />
           </div>
         </div>
       )}
 
-      <div className="p-4 grid grid-cols-1 lg:grid-cols-[320px,1fr] gap-4">
+      <div className="p-4 grid grid-cols-1 lg:grid-cols-[420px,1fr] gap-4">
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 bg-slate-50/70 dark:bg-slate-900/40">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Status Distribution</h4>
@@ -289,22 +289,22 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
             )}
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="relative w-[140px] h-[140px]">
-              <svg width="140" height="140" viewBox="0 0 140 140">
-                <circle cx="70" cy="70" r="58" fill="none" stroke="currentColor" strokeWidth="1" className="text-slate-200 dark:text-slate-700" />
+          <div className="flex items-center gap-5">
+            <div className="relative w-[190px] h-[190px]">
+              <svg width="190" height="190" viewBox="0 0 190 190">
+                <circle cx="95" cy="95" r="80" fill="none" stroke="currentColor" strokeWidth="1" className="text-slate-200 dark:text-slate-700" />
                 {activeTaskStatus.total === 0 ? (
-                  <circle cx="70" cy="70" r="58" className="fill-slate-200 dark:fill-slate-700" />
+                  <circle cx="95" cy="95" r="80" className="fill-slate-200 dark:fill-slate-700" />
                 ) : (
                   activeTaskStatus.slices.map((slice) => (
                     <path key={slice.key} d={slice.d} fill={slice.color} />
                   ))
                 )}
-                <circle cx="70" cy="70" r="34" className="fill-white dark:fill-slate-800" />
-                <text x="70" y="66" textAnchor="middle" className="fill-slate-800 dark:fill-slate-100" fontSize="18" fontWeight="700">
+                <circle cx="95" cy="95" r="46" className="fill-white dark:fill-slate-800" />
+                <text x="95" y="90" textAnchor="middle" className="fill-slate-800 dark:fill-slate-100" fontSize="28" fontWeight="700">
                   {activeTaskStatus.total}
                 </text>
-                <text x="70" y="82" textAnchor="middle" className="fill-slate-400" fontSize="9" fontWeight="500">
+                <text x="95" y="111" textAnchor="middle" className="fill-slate-400" fontSize="11" fontWeight="500">
                   TASKS
                 </text>
               </svg>
