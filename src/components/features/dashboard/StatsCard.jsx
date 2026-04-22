@@ -10,16 +10,19 @@ const StatsCard = ({ label, value, icon: Icon, color = "blue", sub, compact = fa
     green:  "bg-green-50  dark:bg-green-900/20  text-green-600  dark:text-green-400",
   };
   return (
-    <Card className={`animate-fade-in ${compact ? "p-4" : ""}`}>
+    <Card
+      padding={!compact}
+      className={`animate-fade-in ${compact ? "px-4 py-3" : ""}`}
+    >
       <div className="flex items-start justify-between">
         <div>
-          <p className={`${compact ? "text-xs" : "text-sm"} text-slate-500 dark:text-slate-400 font-medium`}>{label}</p>
-          <p className={`${compact ? "mt-1 text-2xl" : "mt-1.5 text-3xl"} font-bold text-slate-900 dark:text-slate-100`}>{value}</p>
-          {sub && <p className={`${compact ? "mt-0.5 text-[11px]" : "mt-1 text-xs"} text-slate-400 dark:text-slate-500`}>{sub}</p>}
+          <p className={`${compact ? "text-[11px]" : "text-sm"} text-slate-500 dark:text-slate-400 font-medium`}>{label}</p>
+          <p className={`${compact ? "mt-0.5 text-[32px] leading-none" : "mt-1.5 text-3xl"} font-bold text-slate-900 dark:text-slate-100`}>{value}</p>
+          {sub && <p className={`${compact ? "mt-0 text-[11px]" : "mt-1 text-xs"} text-slate-400 dark:text-slate-500`}>{sub}</p>}
         </div>
         {Icon && (
-          <div className={`${compact ? "p-2 rounded-lg" : "p-2.5 rounded-xl"} ${colorMap[color] || colorMap.blue}`}>
-            <Icon size={compact ? 18 : 20} />
+          <div className={`${compact ? "p-1.5 rounded-lg" : "p-2.5 rounded-xl"} ${colorMap[color] || colorMap.blue}`}>
+            <Icon size={compact ? 16 : 20} />
           </div>
         )}
       </div>
