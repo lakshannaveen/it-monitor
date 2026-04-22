@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import Card from "../components/common/Card";
 import Badge from "../components/common/Badge";
@@ -14,24 +14,52 @@ const TaskDetailsPage = () => {
   const [error, setError] = useState(null);
   const [isAvailable, setIsAvailable] = useState(null);
 
+  const isMounted = useRef(false);
+
   useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const set = await barcodeService.getTaskDetails(serviceNo);
-        if (mounted) setTasks(set || []);
-      } catch (e) {
-        console.error("Failed to load tasks", e);
-        if (mounted) setError("Failed to load tasks");
-      } finally {
-        if (mounted) setLoading(false);
-      }
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
     };
-    load();
-    return () => (mounted = false);
+  }, []);
+
+  const loadTasks = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const set = await barcodeService.getTaskDetails(serviceNo);
+      if (isMounted.current) setTasks(set || []);
+    } catch (e) {
+      console.error("Failed to load tasks", e);
+      if (isMounted.current) setError("Failed to load tasks");
+    } finally {
+      if (isMounted.current) setLoading(false);
+    }
   }, [serviceNo]);
+
+  useEffect(() => {
+    // initial load and reload on navigation back or when tab becomes visible
+    loadTasks();
+
+    const handlePop = () => loadTasks();
+    const handlePageShow = (e) => {
+      // pageshow.persisted indicates bfcache restoration in some browsers
+      if (e.persisted) loadTasks();
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") loadTasks();
+    };
+
+    window.addEventListener("popstate", handlePop);
+    window.addEventListener("pageshow", handlePageShow);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.removeEventListener("popstate", handlePop);
+      window.removeEventListener("pageshow", handlePageShow);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [loadTasks]);
 
   useEffect(() => {
     let mounted = true;
