@@ -147,7 +147,7 @@ const TaskDetailsPage = () => {
               key={i}
               className={`${
                 highlightRows
-                  ? "bg-lime-50/90 dark:bg-lime-900/20"
+                  ? "bg-lime-50/90 dark:bg-lime-800/25 border-l-4 border-lime-300 dark:border-lime-400"
                   : "bg-white dark:bg-slate-800"
               }`}
             >
