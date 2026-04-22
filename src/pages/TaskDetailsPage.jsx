@@ -82,6 +82,13 @@ const TaskDetailsPage = () => {
     return "slate";
   };
 
+  const getRequestedByName = (value) => {
+    const text = String(value || "").trim();
+    if (!text) return "-";
+    const parts = text.split(" - ");
+    return parts.length > 1 ? parts.slice(1).join(" - ").trim() || "-" : text;
+  };
+
   const inProgressCount = tasks.filter((t) => String(t.Status || "").toLowerCase().includes("progress")).length;
   const pendingCount = tasks.filter((t) => String(t.Status || "").toLowerCase().includes("pending")).length;
 
@@ -153,6 +160,7 @@ const TaskDetailsPage = () => {
               <thead>
                 <tr className="text-left text-xs text-slate-500 uppercase tracking-wider">
                   <th className="px-4 py-3">Task</th>
+                  <th className="px-4 py-3">Requested By</th>
                   <th className="px-4 py-3">Job Type</th>
                   <th className="px-4 py-3">Reference</th>
                   <th className="px-4 py-3">Planned</th>
@@ -166,6 +174,7 @@ const TaskDetailsPage = () => {
                     <td className="px-4 py-4 align-top">
                       <div className="font-medium text-slate-800 dark:text-slate-100">{t.Task || "Untitled task"}</div>
                     </td>
+                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">{getRequestedByName(t.RequestedBy)}</td>
                     <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">{t.JobType || "-"}</td>
                     <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">{t.ReferenceNo || "-"}</td>
                     <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
