@@ -2,8 +2,8 @@ import React, { useMemo, useState } from "react";
 import Card from "../../common/Card";
 import Badge from "../../common/Badge";
 import { formatDate, formatDuration } from "../../../utils/formatters";
+import { barcodeService } from "../../../services/barcodeService";
 
-// ── Avatar helpers ──────────────────────────────────────────────────────────
 const AVATAR_COLORS = [
   ["#3b82f6", "#1d4ed8"],
   ["#8b5cf6", "#6d28d9"],
@@ -27,39 +27,67 @@ const getInitials = (name = "") => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-const Avatar = ({ name, size = "sm" }) => {
+const parseServiceNo = (value) => {
+  const match = String(value || "").match(/\b(\d{4,})\b/);
+  return match ? match[1] : null;
+};
+
+const getRecordServiceNo = (record = {}) =>
+  record.incharge ||
+  record.officerincharge ||
+  record.OfficerIncharge ||
+  record.serviceNo ||
+  record.Service_No ||
+  parseServiceNo(record.requester) ||
+  parseServiceNo(record.officer) ||
+  null;
+
+const Avatar = ({ name, serviceNo, size = "sm" }) => {
   const [from, to] = getAvatarColor(name);
   const initials = getInitials(name);
   const sizeClass = size === "sm" ? "w-8 h-8 text-xs" : "w-10 h-10 text-sm";
+  const imageUrl = serviceNo ? barcodeService.getUserImageUrl(serviceNo) : null;
+  const [loaded, setLoaded] = useState(false);
+
   return (
     <div
-      className={`${sizeClass} rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0 shadow-sm`}
+      className={`${sizeClass} rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0 shadow-sm overflow-hidden relative`}
       style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
     >
-      {initials}
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt={name}
+          onLoad={() => setLoaded(true)}
+          onError={() => setLoaded(false)}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: loaded ? 1 : 0, transition: "opacity 200ms ease-in-out" }}
+        />
+      )}
+      <span style={{ opacity: loaded ? 0 : 1, transition: "opacity 200ms ease-in-out" }}>{initials}</span>
     </div>
   );
 };
 
-// ── Detect in-progress records ──────────────────────────────────────────────
-const isInProgress = (r) => {
-  const s = (r.status || r.jobstatus || "").toLowerCase();
-  if (s.includes("progress") || s.includes("inprogress")) return true;
-  if (s.includes("complete") || s.includes("done") || s.includes("pending") || s.includes("hold")) return false;
-  return parseFloat(r.reuhour || 0) > 0;
+const isInProgress = (record) => {
+  const status = (record.status || record.jobstatus || "").toLowerCase();
+  if (status.includes("progress") || status.includes("inprogress")) return true;
+  if (status.includes("complete") || status.includes("done") || status.includes("pending") || status.includes("hold")) return false;
+  return parseFloat(record.reuhour || 0) > 0;
 };
 
 const groupByEmployee = (records) => {
   const map = {};
-  records.filter(isInProgress).forEach((r) => {
-    const name = r.officer || r.requester || "Unknown";
-    if (!map[name]) map[name] = [];
-    map[name].push(r);
+  records.filter(isInProgress).forEach((record) => {
+    const name = record.officer || record.requester || "Unknown";
+    const serviceNo = getRecordServiceNo(record);
+    const key = serviceNo || name;
+    if (!map[key]) map[key] = { key, name, serviceNo, jobs: [] };
+    map[key].jobs.push(record);
   });
-  return Object.entries(map).sort((a, b) => b[1].length - a[1].length);
+  return Object.values(map).sort((a, b) => b.jobs.length - a.jobs.length);
 };
 
-// ── In-Progress Summary panel ───────────────────────────────────────────────
 const InProgressSummary = ({ records }) => {
   const groups = useMemo(() => groupByEmployee(records), [records]);
   const [expanded, setExpanded] = useState(null);
@@ -74,16 +102,16 @@ const InProgressSummary = ({ records }) => {
 
   return (
     <div className="divide-y divide-slate-100 dark:divide-slate-800">
-      {groups.map(([name, jobs]) => {
-        const totalHrs = jobs.reduce((s, r) => s + parseFloat(r.reuhour || 0), 0);
-        const isOpen = expanded === name;
+      {groups.map(({ key, name, serviceNo, jobs }) => {
+        const totalHrs = jobs.reduce((sum, record) => sum + parseFloat(record.reuhour || 0), 0);
+        const isOpen = expanded === key;
         return (
-          <div key={name}>
+          <div key={key}>
             <button
-              onClick={() => setExpanded(isOpen ? null : name)}
+              onClick={() => setExpanded(isOpen ? null : key)}
               className="w-full flex items-center gap-3 px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left"
             >
-              <Avatar name={name} size="sm" />
+              <Avatar name={name} serviceNo={serviceNo} size="sm" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{name}</p>
                 <p className="text-xs text-slate-400">
@@ -97,7 +125,10 @@ const InProgressSummary = ({ records }) => {
                 </span>
                 <svg
                   className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
@@ -105,15 +136,15 @@ const InProgressSummary = ({ records }) => {
             </button>
             {isOpen && (
               <div className="bg-slate-50 dark:bg-slate-900/40 border-t border-slate-100 dark:border-slate-800">
-                {jobs.map((r, i) => (
-                  <div key={i} className="flex items-start gap-3 px-8 py-2.5 border-b border-slate-100 dark:border-slate-800 last:border-0">
-                    <Badge jobType={r.jobtype} />
+                {jobs.map((record, idx) => (
+                  <div key={idx} className="flex items-start gap-3 px-8 py-2.5 border-b border-slate-100 dark:border-slate-800 last:border-0">
+                    <Badge jobType={record.jobtype} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-slate-700 dark:text-slate-300 line-clamp-1">{r.logdesc || "—"}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{formatDate(r.ictdate)}</p>
+                      <p className="text-xs text-slate-700 dark:text-slate-300 line-clamp-1">{record.logdesc || "-"}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{formatDate(record.ictdate)}</p>
                     </div>
                     <span className="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                      {formatDuration(r.reuhour)}
+                      {formatDuration(record.reuhour)}
                     </span>
                   </div>
                 ))}
@@ -126,7 +157,6 @@ const InProgressSummary = ({ records }) => {
   );
 };
 
-// ── Main component ──────────────────────────────────────────────────────────
 const RecentActivity = ({ records }) => {
   const [tab, setTab] = useState("recent");
   const recent = [...records].slice(0, 8);
@@ -155,7 +185,13 @@ const RecentActivity = ({ records }) => {
         >
           In Progress
           {inProgressCount > 0 && (
-            <span className={`rounded-full px-1.5 text-xs font-bold ${tab === "inprogress" ? "bg-white/20 text-white" : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"}`}>
+            <span
+              className={`rounded-full px-1.5 text-xs font-bold ${
+                tab === "inprogress"
+                  ? "bg-white/20 text-white"
+                  : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+              }`}
+            >
               {inProgressCount}
             </span>
           )}
@@ -167,21 +203,25 @@ const RecentActivity = ({ records }) => {
           {recent.length === 0 && (
             <li className="px-5 py-8 text-center text-sm text-slate-400">No records</li>
           )}
-          {recent.map((r, i) => {
-            const name = r.officer || r.requester || "Unknown";
+          {recent.map((record, idx) => {
+            const name = record.officer || record.requester || "Unknown";
+            const serviceNo = getRecordServiceNo(record);
             return (
-              <li key={i} className="flex items-start gap-3 px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                <Avatar name={name} size="sm" />
+              <li
+                key={idx}
+                className="flex items-start gap-3 px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+              >
+                <Avatar name={name} serviceNo={serviceNo} size="sm" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{r.logdesc || "—"}</p>
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{record.logdesc || "-"}</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <Badge jobType={r.jobtype} />
+                    <Badge jobType={record.jobtype} />
                     <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{name}</p>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400">{formatDuration(r.reuhour)}</p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{formatDate(r.ictdate)}</p>
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400">{formatDuration(record.reuhour)}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{formatDate(record.ictdate)}</p>
                 </div>
               </li>
             );
