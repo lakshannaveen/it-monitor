@@ -200,7 +200,6 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
         <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Team Members</h3>
         <div className="text-right">
           <p className="text-xs text-slate-400 dark:text-slate-500">{employees.length} employees</p>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500">Auto carousel every 30 seconds</p>
         </div>
       </div>
 
