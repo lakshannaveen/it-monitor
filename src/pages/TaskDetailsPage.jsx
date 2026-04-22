@@ -101,7 +101,7 @@ const TaskDetailsPage = () => {
   const profileImageUrl = serviceNo ? barcodeService.getUserImageUrl(serviceNo) : null;
   const profileLabel = `${serviceNo} - ${name || "Unknown"}`;
 
-  const renderTable = (list) => (
+  const renderTable = (list, highlightRows = false) => (
     <div className="overflow-x-auto">
       <table className="min-w-full text-lg">
         <thead>
@@ -115,7 +115,14 @@ const TaskDetailsPage = () => {
         </thead>
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
           {list.map((t, i) => (
-            <tr key={i} className="bg-white dark:bg-slate-800">
+            <tr
+              key={i}
+              className={`${
+                highlightRows
+                  ? "bg-lime-50/90 dark:bg-lime-900/20"
+                  : "bg-white dark:bg-slate-800"
+              }`}
+            >
               <td className="px-4 py-6 align-top text-center text-slate-600 dark:text-slate-300">
                 <div className="flex justify-center">
                   <div className="relative w-16 h-16 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-base font-semibold text-slate-600 dark:text-slate-200 shrink-0">
@@ -200,12 +207,12 @@ const TaskDetailsPage = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="rounded-xl border border-lime-300 bg-lime-100/80 dark:border-lime-700/60 dark:bg-lime-900/20">
-                <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-lime-800 dark:text-lime-300">
+              <div className="rounded-xl border border-slate-200 bg-white/80 dark:border-slate-700 dark:bg-slate-800/40">
+                <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
                   In Progress
                 </h3>
                 {inProgressTasks.length > 0 ? (
-                  renderTable(inProgressTasks)
+                  renderTable(inProgressTasks, true)
                 ) : (
                   <div className="px-4 pb-4 text-sm text-slate-500 dark:text-slate-400">No in-progress tasks.</div>
                 )}
