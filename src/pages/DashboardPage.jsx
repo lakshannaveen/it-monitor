@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import { Layers, Clock, Monitor, Wifi } from "lucide-react";
 import { selectStats, selectGroupedByJobType, selectAllRecords, selectLoading, selectError } from "../store/selectors";
 import { useFetch } from "../hooks/useFetch";
-import { PageHeader } from "../components/common";
 import Navigation from "../components/layout/Navigation";
 import StatsCard from "../components/features/dashboard/StatsCard";
 import JobTypeChart from "../components/features/dashboard/JobTypeChart";
@@ -27,10 +26,6 @@ const DashboardPage = () => {
   return (
     <div className="animate-fade-in">
       <Navigation />
-      <PageHeader
-        title="Dashboard"
-        subtitle="Overview of ICT progress monitoring activity"
-      />
 
       {/* Section A – Employee Strip */}
       <EmployeeStrip records={records} />

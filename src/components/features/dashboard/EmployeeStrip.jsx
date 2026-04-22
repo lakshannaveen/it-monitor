@@ -3,19 +3,28 @@ import { useNavigate } from "react-router-dom";
 import Card from "../../common/Card";
 import Badge from "../../common/Badge";
 import { barcodeService } from "../../../services/barcodeService";
-import { formatDuration } from "../../../utils/formatters";
+import { formatDate, formatDuration } from "../../../utils/formatters";
 
-// Generate a consistent color avatar for a name
+const STATUS_COLORS = {
+  InProgress: "#3b82f6",
+  Pending: "#8b5cf6",
+  TemporaryHold: "#f59e0b",
+  Completed: "#10b981",
+};
+
+const CAROUSEL_MS = 30 * 1000;
+const TASK_REFRESH_MS = 30 * 1000;
+
 const getAvatarColor = (name = "") => {
   const colors = [
-    ["#3b82f6", "#1d4ed8"], // blue
-    ["#8b5cf6", "#6d28d9"], // violet
-    ["#06b6d4", "#0891b2"], // cyan
-    ["#10b981", "#059669"], // emerald
-    ["#f59e0b", "#d97706"], // amber
-    ["#ef4444", "#dc2626"], // red
-    ["#ec4899", "#db2777"], // pink
-    ["#6366f1", "#4f46e5"], // indigo
+    ["#3b82f6", "#1d4ed8"],
+    ["#8b5cf6", "#6d28d9"],
+    ["#06b6d4", "#0891b2"],
+    ["#10b981", "#059669"],
+    ["#f59e0b", "#d97706"],
+    ["#ef4444", "#dc2626"],
+    ["#ec4899", "#db2777"],
+    ["#6366f1", "#4f46e5"],
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -24,21 +33,18 @@ const getAvatarColor = (name = "") => {
 
 const getInitials = (name = "") => {
   const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  if (parts.length <= 1) return (parts[0] || "?").slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 };
 
-// Deterministically decide "online" status – employees with recent activity are online
 const isOnline = (name, records) => {
   const today = new Date();
   const threeDays = 3 * 24 * 60 * 60 * 1000;
   return records.some((r) => {
-    const match =
-      r.requester?.toLowerCase().includes(name.split(" ")[0]?.toLowerCase()) ||
-      r.officer?.toLowerCase().includes(name.split(" ")[0]?.toLowerCase());
+    const first = name.split(" ")[0]?.toLowerCase();
+    const match = r.requester?.toLowerCase().includes(first) || r.officer?.toLowerCase().includes(first);
     if (!match) return false;
-    const diff = today - new Date(r.ictdate);
-    return diff <= threeDays;
+    return today - new Date(r.ictdate) <= threeDays;
   });
 };
 
@@ -53,10 +59,34 @@ const getTaskStatusColor = (status) => {
   return "slate";
 };
 
-const CAROUSEL_MS = 30 * 1000; // auto-advance every 30 seconds
-const TASK_REFRESH_MS = 30 * 1000;
+const detectTaskStatus = (task) => {
+  const status = String(task?.Status || "").toLowerCase();
+  if (status.includes("progress")) return "InProgress";
+  if (status.includes("hold") || status.includes("temporary")) return "TemporaryHold";
+  if (status.includes("complete") || status.includes("done") || status.includes("finish")) return "Completed";
+  return "Pending";
+};
+
+const buildPie = (segments, cx, cy, r) => {
+  const total = segments.reduce((sum, seg) => sum + seg.value, 0);
+  if (total === 0) return [];
+  const slices = [];
+  let angle = -Math.PI / 2;
+  segments.forEach((seg) => {
+    const sweep = (seg.value / total) * 2 * Math.PI;
+    const x1 = cx + r * Math.cos(angle);
+    const y1 = cy + r * Math.sin(angle);
+    angle += sweep;
+    const x2 = cx + r * Math.cos(angle);
+    const y2 = cy + r * Math.sin(angle);
+    const large = sweep > Math.PI ? 1 : 0;
+    slices.push({ ...seg, d: `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z` });
+  });
+  return slices;
+};
 
 const EmployeeStrip = ({ records = [] }) => {
+  const navigate = useNavigate();
   const [apiEmployees, setApiEmployees] = useState([]);
   const [imgStatus, setImgStatus] = useState({});
   const [availability, setAvailability] = useState({});
@@ -67,7 +97,7 @@ const EmployeeStrip = ({ records = [] }) => {
 
   useEffect(() => {
     let mounted = true;
-    const load = async () => {
+    const loadEmployees = async () => {
       try {
         const names = await barcodeService.getITOEmployees();
         if (mounted) setApiEmployees(names || []);
@@ -75,36 +105,58 @@ const EmployeeStrip = ({ records = [] }) => {
         console.warn("Failed to load API employees", e);
       }
     };
-    load();
-    return () => (mounted = false);
+    loadEmployees();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // Use API-provided employees only (no record-derived names)
   const employees = useMemo(() => apiEmployees.slice(0, 20), [apiEmployees]);
-
   const activeEmployee = employees[selectedIndex] || null;
   const activeServiceNo = activeEmployee?.Service_No;
   const activeTasks = activeServiceNo ? tasksByEmployee[activeServiceNo] || [] : [];
   const activeTaskLoading = activeServiceNo ? Boolean(tasksLoading[activeServiceNo]) : false;
   const activeTaskError = activeServiceNo ? tasksError[activeServiceNo] : null;
-  const navigate = useNavigate();
+
+  const activeTaskStatus = useMemo(() => {
+    const counts = { InProgress: 0, Pending: 0, TemporaryHold: 0, Completed: 0 };
+    activeTasks.forEach((task) => {
+      const key = detectTaskStatus(task);
+      counts[key]++;
+    });
+    const segments = Object.entries(counts)
+      .filter(([, value]) => value > 0)
+      .map(([key, value]) => ({ key, value, color: STATUS_COLORS[key] }));
+    return {
+      counts,
+      total: activeTasks.length,
+      slices: buildPie(segments, 70, 70, 58),
+    };
+  }, [activeTasks]);
+
+  const recentTasks = useMemo(
+    () =>
+      [...activeTasks].sort((a, b) => {
+        const da = new Date(a?.IwdDate || a?.PlannedStartDate || 0).getTime();
+        const db = new Date(b?.IwdDate || b?.PlannedStartDate || 0).getTime();
+        return db - da;
+      }),
+    [activeTasks]
+  );
 
   useEffect(() => {
     if (employees.length === 0) return;
-    if (selectedIndex > employees.length - 1) {
-      setSelectedIndex(0);
-    }
+    if (selectedIndex > employees.length - 1) setSelectedIndex(0);
   }, [employees, selectedIndex]);
 
   useEffect(() => {
-    if (employees.length <= 1) return;
+    if (employees.length <= 1) return undefined;
     const timer = setInterval(() => {
       setSelectedIndex((prev) => (prev + 1) % employees.length);
     }, CAROUSEL_MS);
     return () => clearInterval(timer);
   }, [employees.length]);
 
-  // Fetch availability for displayed employees
   useEffect(() => {
     let mounted = true;
     const loadAvailability = async () => {
@@ -114,8 +166,7 @@ const EmployeeStrip = ({ records = [] }) => {
             const svc = emp?.Service_No;
             if (!svc) return [svc, null];
             const res = await barcodeService.getAvailability(svc);
-            const status = (res && res.Status) || "";
-            const isAvail = String(status).toLowerCase().includes("available");
+            const isAvail = String((res && res.Status) || "").toLowerCase().includes("available");
             return [svc, isAvail];
           })
         );
@@ -130,12 +181,11 @@ const EmployeeStrip = ({ records = [] }) => {
       }
     };
     if (employees.length > 0) loadAvailability();
-    return () => (mounted = false);
+    return () => {
+      mounted = false;
+    };
   }, [employees]);
 
-  // Load tasks for the active employee and refresh periodically.
-  // Important: depend only on `activeServiceNo` to avoid refetch loops when
-  // `tasksByEmployee` state is updated inside this effect.
   useEffect(() => {
     let mounted = true;
     const loadTasks = async ({ force = false } = {}) => {
@@ -157,7 +207,6 @@ const EmployeeStrip = ({ records = [] }) => {
       }
     };
 
-    // initial load: allow cache to be used when present
     loadTasks({ force: false });
     const refresh = setInterval(() => {
       loadTasks({ force: true });
@@ -174,133 +223,168 @@ const EmployeeStrip = ({ records = [] }) => {
   return (
     <Card className="mb-4 overflow-hidden" padding={false}>
       <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-        <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-          Team Members
-        </h3>
+        <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Team Members</h3>
         <div className="text-right">
           <p className="text-xs text-slate-400 dark:text-slate-500">{employees.length} employees</p>
           <p className="text-[10px] text-slate-400 dark:text-slate-500">Auto carousel every 30 seconds</p>
         </div>
       </div>
+
       <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2 overflow-x-auto scrollbar-thin">
         {employees.map((emp, idx) => {
           const name = emp?.Name || "";
           const svc = emp?.Service_No;
           const isActive = selectedIndex === idx;
-          const isAvailable = availability.hasOwnProperty(svc) ? availability[svc] : isOnline(name, records);
+          const isAvailable = Object.prototype.hasOwnProperty.call(availability, svc) ? availability[svc] : isOnline(name, records);
+          const imgUrl = svc ? barcodeService.getUserImageUrl(svc) : null;
+          const loaded = imgStatus[svc] === true;
+          const [from, to] = getAvatarColor(name);
+          const initials = getInitials(name);
+
           return (
-            <button
+            <div
               key={svc || name}
               onClick={() => setSelectedIndex(idx)}
-              className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors whitespace-nowrap ${
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") setSelectedIndex(idx);
+              }}
+              className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1.5 text-xs font-medium border transition-colors whitespace-nowrap cursor-pointer ${
                 isActive
                   ? "bg-blue-600 border-blue-600 text-white"
                   : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60"
               }`}
             >
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (svc) navigate(`/tasks/${svc}`, { state: { name } });
+                }}
+                className="relative w-6 h-6 rounded-full overflow-hidden ring-1 ring-white/70 dark:ring-slate-700"
+                title={svc ? `Open tasks for ${name}` : name}
+              >
+                <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${from}, ${to})` }} />
+                {imgUrl && (
+                  <img
+                    src={imgUrl}
+                    alt={name}
+                    onLoad={() => setImgStatus((s) => ({ ...s, [svc]: true }))}
+                    onError={() => setImgStatus((s) => ({ ...s, [svc]: false }))}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ opacity: loaded ? 1 : 0, transition: "opacity 200ms ease-in-out" }}
+                  />
+                )}
+                <span
+                  className="absolute inset-0 flex items-center justify-center text-[9px] font-semibold text-white"
+                  style={{ opacity: loaded ? 0 : 1, transition: "opacity 200ms ease-in-out" }}
+                >
+                  {initials}
+                </span>
+              </button>
               <span className={`w-2 h-2 rounded-full ${isAvailable ? "bg-green-400" : "bg-slate-400"}`} />
               {name}
-            </button>
+            </div>
           );
         })}
       </div>
 
-      <div className="p-4 grid grid-cols-1 lg:grid-cols-[240px,1fr] gap-4">
-        <div
-          className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 bg-slate-50/70 dark:bg-slate-900/40"
-          // make the profile area clickable when a service number exists
-          onClick={() => {
-            const svc = activeEmployee?.Service_No;
-            const name = activeEmployee?.Name || "";
-            if (svc) navigate(`/tasks/${svc}`, { state: { name } });
-          }}
-          role={activeEmployee?.Service_No ? "button" : undefined}
-          aria-label={activeEmployee ? `Open tasks for ${activeEmployee.Name}` : undefined}
-          style={{ cursor: activeEmployee?.Service_No ? "pointer" : "default" }}
-        >
-          {activeEmployee && (() => {
-            const name = activeEmployee?.Name || "";
-            const [from, to] = getAvatarColor(name);
-            const initials = getInitials(name);
-            const svc = activeEmployee?.Service_No;
-            const imgUrl = svc ? barcodeService.getUserImageUrl(svc) : null;
-            const loaded = imgStatus[svc] === true;
-            const isAvailable = availability.hasOwnProperty(svc) ? availability[svc] : isOnline(name, records);
-            return (
-              <div className="flex flex-col items-center text-center">
-                <div className="relative">
-                  <div
-                    className="w-28 h-28 rounded-2xl overflow-hidden relative shadow-md ring-2 ring-white dark:ring-slate-800"
-                    style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
-                  >
-                    {imgUrl && (
-                      <img
-                        src={imgUrl}
-                        alt={name}
-                        onLoad={() => setImgStatus((s) => ({ ...s, [svc]: true }))}
-                        onError={() => setImgStatus((s) => ({ ...s, [svc]: false }))}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        style={{ opacity: imgStatus[svc] === true ? 1 : 0, transition: "opacity 300ms ease-in-out" }}
-                      />
-                    )}
-                    <div className={`w-full h-full flex items-center justify-center text-white text-2xl font-bold`} style={{ opacity: imgStatus[svc] === true ? 0 : 1, transition: "opacity 300ms ease-in-out" }}>
-                      {initials}
-                    </div>
-                  </div>
-                  <span
-                    className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-slate-800 ${
-                      isAvailable ? "bg-green-400 shadow-green-400/50 shadow-sm" : "bg-slate-400"
-                    }`}
-                  />
+      <div className="p-4 grid grid-cols-1 lg:grid-cols-[320px,1fr] gap-4">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 bg-slate-50/70 dark:bg-slate-900/40">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Status Distribution</h4>
+            {activeEmployee?.Service_No && (
+              <button
+                type="button"
+                onClick={() => navigate(`/tasks/${activeEmployee.Service_No}`, { state: { name: activeEmployee?.Name || "" } })}
+                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                Open tasks
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="relative w-[140px] h-[140px]">
+              <svg width="140" height="140" viewBox="0 0 140 140">
+                <circle cx="70" cy="70" r="58" fill="none" stroke="currentColor" strokeWidth="1" className="text-slate-200 dark:text-slate-700" />
+                {activeTaskStatus.total === 0 ? (
+                  <circle cx="70" cy="70" r="58" className="fill-slate-200 dark:fill-slate-700" />
+                ) : (
+                  activeTaskStatus.slices.map((slice) => (
+                    <path key={slice.key} d={slice.d} fill={slice.color} />
+                  ))
+                )}
+                <circle cx="70" cy="70" r="34" className="fill-white dark:fill-slate-800" />
+                <text x="70" y="66" textAnchor="middle" className="fill-slate-800 dark:fill-slate-100" fontSize="18" fontWeight="700">
+                  {activeTaskStatus.total}
+                </text>
+                <text x="70" y="82" textAnchor="middle" className="fill-slate-400" fontSize="9" fontWeight="500">
+                  TASKS
+                </text>
+              </svg>
+            </div>
+
+            <div className="flex-1 space-y-1.5">
+              {[
+                ["InProgress", "In Progress"],
+                ["Pending", "Pending"],
+                ["TemporaryHold", "Temporary Hold"],
+                ["Completed", "Completed"],
+              ].map(([key, label]) => (
+                <div key={key} className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: STATUS_COLORS[key] }} />
+                  <span className="text-xs text-slate-600 dark:text-slate-400 flex-1">{label}</span>
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{activeTaskStatus.counts[key]}</span>
                 </div>
-                <p className="mt-3 text-sm font-semibold text-slate-800 dark:text-slate-100">{name}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{svc || "No service number"}</p>
-                <p className={`mt-2 text-xs font-medium ${isAvailable ? "text-green-600 dark:text-green-400" : "text-slate-500 dark:text-slate-400"}`}>
-                  {isAvailable ? "Available now" : "Not available"}
-                </p>
-              </div>
-            );
-          })()}
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-            <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Tasks</h4>
-            <span className="text-xs text-slate-400 dark:text-slate-500">{activeTasks.length} items</span>
+            <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Recent Activities</h4>
+            <span className="text-xs text-slate-400 dark:text-slate-500">{recentTasks.length} items</span>
           </div>
 
           <div className="relative">
-            <div className="px-4 py-4">
-              <div className="max-h-[360px] min-h-[120px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
-                {activeTasks.length === 0 && !activeTaskError ? (
-                  <div className="px-4 py-8 text-center text-sm text-slate-400 dark:text-slate-500">No tasks found.</div>
-                ) : activeTaskError ? (
-                  <div className="px-4 py-8 text-center text-sm text-red-500">{activeTaskError}</div>
-                ) : (
-                  activeTasks.map((task, index) => (
-                    <div key={`${activeServiceNo}-${index}`} className="px-4 py-3">
-                      <p className="text-sm font-medium text-slate-800 dark:text-slate-200 line-clamp-2">
-                        {task.Task || "Untitled task"}
-                      </p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <Badge label={task.Status || "-"} color={getTaskStatusColor(task.Status)} />
-                        <Badge label={task.JobType || "-"} color={task.JobType === "Hardware" ? "blue" : task.JobType === "Software" ? "indigo" : "slate"} />
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                          {formatDuration(task.HoursTaken || 0)} / {task.HoursAllocated || "-"}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-                        Ref: {task.ReferenceNo || "-"}
+            <div className="max-h-[360px] min-h-[120px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+              {recentTasks.length === 0 && !activeTaskError ? (
+                <div className="px-4 py-8 text-center text-sm text-slate-400 dark:text-slate-500">No recent activities found.</div>
+              ) : activeTaskError ? (
+                <div className="px-4 py-8 text-center text-sm text-red-500">{activeTaskError}</div>
+              ) : (
+                recentTasks.map((task, index) => (
+                  <div key={`${activeServiceNo}-${index}`} className="px-4 py-3">
+                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 line-clamp-2">
+                      {task.Task || "Untitled task"}
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <Badge label={task.Status || "-"} color={getTaskStatusColor(task.Status)} />
+                      <Badge
+                        label={task.JobType || "-"}
+                        color={task.JobType === "Hardware" ? "blue" : task.JobType === "Software" ? "indigo" : "slate"}
+                      />
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                        {formatDuration(task.HoursTaken || 0)} / {task.HoursAllocated || "-"}
+                      </span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between gap-2">
+                      <p className="text-xs text-slate-400 dark:text-slate-500">Ref: {task.ReferenceNo || "-"}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">
+                        {formatDate(task.IwdDate || task.PlannedStartDate || task.PlannedCompletionDate)}
                       </p>
                     </div>
-                  ))
-                )}
-              </div>
+                  </div>
+                ))
+              )}
             </div>
 
             {activeTaskLoading && (
               <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/60 flex items-center justify-center pointer-events-none">
-                <div className="text-sm text-slate-600 dark:text-slate-300">Loading tasks...</div>
+                <div className="text-sm text-slate-600 dark:text-slate-300">Loading activities...</div>
               </div>
             )}
           </div>
