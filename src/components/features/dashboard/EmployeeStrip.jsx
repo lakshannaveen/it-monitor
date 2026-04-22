@@ -6,6 +6,9 @@ import StatsCard from "./StatsCard";
 import RecentActivity from "./RecentActivity";
 import { barcodeService } from "../../../services/barcodeService";
 
+const avatarLoadedCache = new Set();
+const avatarFailedCache = new Set();
+
 const STATUS_COLORS = {
   InProgress: "#3b82f6",
   Pending: "#8b5cf6",
@@ -164,6 +167,41 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
   }, [employees]);
 
   useEffect(() => {
+    if (employees.length === 0) return;
+    let mounted = true;
+
+    const updates = {};
+    employees.forEach((emp) => {
+      const svc = emp?.Service_No;
+      if (!svc) return;
+      if (avatarLoadedCache.has(svc)) updates[svc] = true;
+      if (avatarFailedCache.has(svc)) updates[svc] = false;
+    });
+    if (Object.keys(updates).length > 0) {
+      setImgStatus((prev) => ({ ...updates, ...prev }));
+    }
+
+    employees.forEach((emp) => {
+      const svc = emp?.Service_No;
+      if (!svc || avatarLoadedCache.has(svc) || avatarFailedCache.has(svc)) return;
+      const img = new Image();
+      img.src = barcodeService.getUserImageUrl(svc);
+      img.onload = () => {
+        avatarLoadedCache.add(svc);
+        if (mounted) setImgStatus((prev) => ({ ...prev, [svc]: true }));
+      };
+      img.onerror = () => {
+        avatarFailedCache.add(svc);
+        if (mounted) setImgStatus((prev) => ({ ...prev, [svc]: false }));
+      };
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [employees]);
+
+  useEffect(() => {
     let mounted = true;
     const loadTasks = async ({ force = false } = {}) => {
       if (!activeServiceNo) return;
@@ -243,8 +281,14 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
                   <img
                     src={imgUrl}
                     alt={name}
-                    onLoad={() => setImgStatus((s) => ({ ...s, [svc]: true }))}
-                    onError={() => setImgStatus((s) => ({ ...s, [svc]: false }))}
+                    onLoad={() => {
+                      avatarLoadedCache.add(svc);
+                      setImgStatus((s) => ({ ...s, [svc]: true }));
+                    }}
+                    onError={() => {
+                      avatarFailedCache.add(svc);
+                      setImgStatus((s) => ({ ...s, [svc]: false }));
+                    }}
                     className="absolute inset-0 w-full h-full object-cover"
                     style={{ opacity: loaded ? 1 : 0, transition: "opacity 200ms ease-in-out" }}
                   />
