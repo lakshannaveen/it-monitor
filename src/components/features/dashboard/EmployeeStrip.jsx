@@ -235,7 +235,7 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
                   e.stopPropagation();
                   if (svc) navigate(`/tasks/${svc}`, { state: { name } });
                 }}
-                className="relative w-6 h-6 rounded-full overflow-hidden ring-1 ring-white/70 dark:ring-slate-700"
+                className="relative w-8 h-8 rounded-full overflow-hidden ring-1 ring-white/70 dark:ring-slate-700"
                 title={svc ? `Open tasks for ${name}` : name}
               >
                 <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${from}, ${to})` }} />
@@ -250,7 +250,7 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
                   />
                 )}
                 <span
-                  className="absolute inset-0 flex items-center justify-center text-[9px] font-semibold text-white"
+                  className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold text-white"
                   style={{ opacity: loaded ? 0 : 1, transition: "opacity 200ms ease-in-out" }}
                 >
                   {initials}
