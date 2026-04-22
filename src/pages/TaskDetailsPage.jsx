@@ -160,10 +160,10 @@ const TaskDetailsPage = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[320px,1fr] gap-4 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-[380px,1fr] gap-4 items-start">
         <Card className="h-full min-h-[640px] bg-gradient-to-b from-white to-slate-50/60 dark:from-slate-900 dark:to-slate-900/70">
           <div className="h-full flex flex-col items-center text-center">
-            <div className="relative w-48 h-48 rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-4xl font-bold text-slate-600 dark:text-slate-200 shrink-0 mt-4">
+            <div className="relative w-64 h-64 rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-5xl font-bold text-slate-600 dark:text-slate-200 shrink-0 mt-4">
               {profileImageUrl && (
                 <img
                   src={profileImageUrl}
@@ -176,7 +176,7 @@ const TaskDetailsPage = () => {
               )}
               <span>{getInitials(name || serviceNo)}</span>
               <span
-                className={`absolute bottom-3 right-3 w-4 h-4 rounded-full ring-2 ring-white dark:ring-slate-900 ${
+                className={`absolute top-4 right-4 w-5 h-5 rounded-full ring-2 ring-white dark:ring-slate-900 ${
                   isAvailable ? "bg-green-400" : "bg-slate-400"
                 }`}
                 title={isAvailable ? "Available" : "Not available"}
