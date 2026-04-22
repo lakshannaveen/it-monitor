@@ -150,7 +150,15 @@ const TaskDetailsPage = () => {
                 {t.HoursTaken || 0}
               </td>
               <td className="px-4 py-6 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                {t.Status ? <Badge label={t.Status} color={getStatusColor(t.Status)} className="whitespace-nowrap" /> : "-"}
+                {t.Status ? (
+                  <Badge
+                    label={t.Status}
+                    color={getStatusColor(t.Status)}
+                    className="whitespace-nowrap text-sm md:text-base px-3 py-1.5 rounded-md font-semibold"
+                  />
+                ) : (
+                  "-"
+                )}
               </td>
             </tr>
           ))}
