@@ -26,7 +26,7 @@ const Layout = ({ children }) => {
           ${sidebarOpen ? "lg:ml-64" : "lg:ml-20"}
         `}
       >
-        <div className="p-4 sm:p-5 md:p-7 max-w-7xl mx-auto">
+        <div className="p-4 sm:p-5 md:p-7 w-full max-w-none">
           {children}
         </div>
       </main>
