@@ -235,7 +235,7 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
                   e.stopPropagation();
                   if (svc) navigate(`/tasks/${svc}`, { state: { name } });
                 }}
-                className="relative w-10 h-10 rounded-full overflow-hidden ring-1 ring-white/70 dark:ring-slate-700"
+                className="relative w-12 h-12 rounded-full overflow-hidden ring-1 ring-white/70 dark:ring-slate-700"
                 title={svc ? `Open tasks for ${name}` : name}
               >
                 <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${from}, ${to})` }} />
