@@ -163,8 +163,8 @@ const TaskDetailsPage = () => {
                   <th className="px-4 py-3">Requested By</th>
                   <th className="px-4 py-3">Job Type</th>
                   <th className="px-4 py-3">Reference</th>
-                  <th className="px-4 py-3">Planned</th>
-                  <th className="px-4 py-3">Hours</th>
+                  <th className="px-4 py-3 whitespace-nowrap">Planned</th>
+                  <th className="px-4 py-3 whitespace-nowrap">Hours</th>
                   <th className="px-4 py-3">Status</th>
                 </tr>
               </thead>
@@ -177,10 +177,12 @@ const TaskDetailsPage = () => {
                     <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">{getRequestedByName(t.RequestedBy)}</td>
                     <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">{t.JobType || "-"}</td>
                     <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">{t.ReferenceNo || "-"}</td>
-                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
+                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap">
                       {t.PlannedStartDate || "-"} &rarr; {t.PlannedCompletionDate || "-"}
                     </td>
-                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">{t.HoursTaken || 0} / {t.HoursAllocated || "-"}</td>
+                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap tabular-nums">
+                      {t.HoursTaken || 0} / {t.HoursAllocated || "-"}
+                    </td>
                     <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
                       {t.Status ? <Badge label={t.Status} color={getStatusColor(t.Status)} /> : "-"}
                     </td>
