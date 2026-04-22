@@ -79,22 +79,22 @@ const TaskDetailsPage = () => {
 
   const renderTable = (list) => (
     <div className="overflow-x-auto">
-      <table className="min-w-full text-sm">
+      <table className="min-w-full text-lg">
         <thead>
-          <tr className="text-left text-xs text-slate-500 uppercase tracking-wider">
-            <th className="px-4 py-3">Requested By</th>
-            <th className="px-4 py-3">Task</th>
-            <th className="px-4 py-3 whitespace-nowrap">All Hours</th>
-            <th className="px-4 py-3 whitespace-nowrap">Actual Hours</th>
-            <th className="px-4 py-3">Status</th>
+          <tr className="text-left text-base text-slate-500 uppercase tracking-wider">
+            <th className="px-4 py-4">Requested By</th>
+            <th className="px-4 py-4">Task</th>
+            <th className="px-4 py-4 whitespace-nowrap">All Hours</th>
+            <th className="px-4 py-4 whitespace-nowrap">Actual Hours</th>
+            <th className="px-4 py-4">Status</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
           {list.map((t, i) => (
             <tr key={i} className="bg-white dark:bg-slate-800">
-              <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
+              <td className="px-4 py-6 align-top text-slate-600 dark:text-slate-300">
                 <div className="flex items-start">
-                  <div className="relative w-9 h-9 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[11px] font-semibold text-slate-600 dark:text-slate-200 shrink-0">
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-base font-semibold text-slate-600 dark:text-slate-200 shrink-0">
                     {getRequestedByServiceNo(t.RequestedBy) && (
                       <img
                         src={barcodeService.getUserImageUrl(getRequestedByServiceNo(t.RequestedBy))}
@@ -109,17 +109,17 @@ const TaskDetailsPage = () => {
                   </div>
                 </div>
               </td>
-              <td className="px-4 py-4 align-top">
-                <div className="font-medium text-slate-800 dark:text-slate-100">{t.Task || "Untitled task"}</div>
+              <td className="px-4 py-6 align-top">
+                <div className="font-medium text-xl leading-8 text-slate-800 dark:text-slate-100">{t.Task || "Untitled task"}</div>
               </td>
-              <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap tabular-nums">
+              <td className="px-4 py-6 align-top text-slate-700 dark:text-slate-200 whitespace-nowrap tabular-nums font-medium text-xl">
                 {t.HoursAllocated || "-"}
               </td>
-              <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap tabular-nums">
+              <td className="px-4 py-6 align-top text-slate-700 dark:text-slate-200 whitespace-nowrap tabular-nums font-medium text-xl">
                 {t.HoursTaken || 0}
               </td>
-              <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
-                {t.Status ? <Badge label={t.Status} color={getStatusColor(t.Status)} /> : "-"}
+              <td className="px-4 py-6 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                {t.Status ? <Badge label={t.Status} color={getStatusColor(t.Status)} className="whitespace-nowrap" /> : "-"}
               </td>
             </tr>
           ))}
