@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import { selectStats, selectGroupedByJobType, selectAllRecords, selectLoading, selectError } from "../store/selectors";
 import { useFetch } from "../hooks/useFetch";
 import JobTypeChart from "../components/features/dashboard/JobTypeChart";
-import RecentActivity from "../components/features/dashboard/RecentActivity";
 import EmployeeStrip from "../components/features/dashboard/EmployeeStrip";
 import LoadingState from "./states/LoadingState";
 import ErrorState from "./states/ErrorState";
@@ -24,17 +23,8 @@ const DashboardPage = () => {
       {/* Section A – Employee Strip */}
       <EmployeeStrip records={records} stats={stats} />
 
-      {/* Chart row: Job Type + Status Pie (Section B) + Recent Activity (Section C) */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Left column: Job Type Distribution bar chart + Status Pie chart */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
-          <JobTypeChart grouped={grouped} />
-        </div>
-
-        {/* Right column: Recent Activity / In-Progress tabs (Section C) */}
-        <div className="lg:col-span-3">
-          <RecentActivity records={records} />
-        </div>
+      <div className="mt-4">
+        <JobTypeChart grouped={grouped} />
       </div>
     </div>
   );

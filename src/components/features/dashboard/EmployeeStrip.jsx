@@ -2,10 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layers, Clock, Monitor } from "lucide-react";
 import Card from "../../common/Card";
-import Badge from "../../common/Badge";
 import StatsCard from "./StatsCard";
+import RecentActivity from "./RecentActivity";
 import { barcodeService } from "../../../services/barcodeService";
-import { formatDate, formatDuration } from "../../../utils/formatters";
 
 const STATUS_COLORS = {
   InProgress: "#3b82f6",
@@ -50,17 +49,6 @@ const isOnline = (name, records) => {
   });
 };
 
-const getTaskStatusColor = (status) => {
-  const s = String(status || "").toLowerCase();
-  if (!s) return "slate";
-  if (s.includes("complete") || s.includes("done")) return "green";
-  if (s.includes("progress") || s.includes("active") || s.includes("ongoing")) return "blue";
-  if (s.includes("hold")) return "purple";
-  if (s.includes("pending") || s.includes("queue")) return "yellow";
-  if (s.includes("cancel") || s.includes("reject") || s.includes("fail")) return "red";
-  return "slate";
-};
-
 const detectTaskStatus = (task) => {
   const status = String(task?.Status || "").toLowerCase();
   if (status.includes("progress")) return "InProgress";
@@ -95,7 +83,6 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [tasksByEmployee, setTasksByEmployee] = useState({});
   const [tasksLoading, setTasksLoading] = useState({});
-  const [tasksError, setTasksError] = useState({});
 
   useEffect(() => {
     let mounted = true;
@@ -117,8 +104,6 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
   const activeEmployee = employees[selectedIndex] || null;
   const activeServiceNo = activeEmployee?.Service_No;
   const activeTasks = activeServiceNo ? tasksByEmployee[activeServiceNo] || [] : [];
-  const activeTaskLoading = activeServiceNo ? Boolean(tasksLoading[activeServiceNo]) : false;
-  const activeTaskError = activeServiceNo ? tasksError[activeServiceNo] : null;
 
   const activeTaskStatus = useMemo(() => {
     const counts = { InProgress: 0, Pending: 0, TemporaryHold: 0, Completed: 0 };
@@ -135,16 +120,6 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
       slices: buildPie(segments, 70, 70, 58),
     };
   }, [activeTasks]);
-
-  const recentTasks = useMemo(
-    () =>
-      [...activeTasks].sort((a, b) => {
-        const da = new Date(a?.IwdDate || a?.PlannedStartDate || 0).getTime();
-        const db = new Date(b?.IwdDate || b?.PlannedStartDate || 0).getTime();
-        return db - da;
-      }),
-    [activeTasks]
-  );
 
   useEffect(() => {
     if (employees.length === 0) return;
@@ -194,15 +169,12 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
       if (!activeServiceNo) return;
       if (!force && tasksByEmployee[activeServiceNo]) return;
       setTasksLoading((prev) => ({ ...prev, [activeServiceNo]: true }));
-      setTasksError((prev) => ({ ...prev, [activeServiceNo]: null }));
       try {
         const set = await barcodeService.getTaskDetails(activeServiceNo);
         if (!mounted) return;
         setTasksByEmployee((prev) => ({ ...prev, [activeServiceNo]: set || [] }));
       } catch (e) {
         console.warn("Failed to load employee tasks", e);
-        if (!mounted) return;
-        setTasksError((prev) => ({ ...prev, [activeServiceNo]: "Failed to load tasks" }));
       } finally {
         if (!mounted) return;
         setTasksLoading((prev) => ({ ...prev, [activeServiceNo]: false }));
@@ -356,51 +328,8 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-            <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Recent Activities</h4>
-            <span className="text-xs text-slate-400 dark:text-slate-500">{recentTasks.length} items</span>
-          </div>
-
-          <div className="relative">
-            <div className="max-h-[360px] min-h-[120px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
-              {recentTasks.length === 0 && !activeTaskError ? (
-                <div className="px-4 py-8 text-center text-sm text-slate-400 dark:text-slate-500">No recent activities found.</div>
-              ) : activeTaskError ? (
-                <div className="px-4 py-8 text-center text-sm text-red-500">{activeTaskError}</div>
-              ) : (
-                recentTasks.map((task, index) => (
-                  <div key={`${activeServiceNo}-${index}`} className="px-4 py-3">
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 line-clamp-2">
-                      {task.Task || "Untitled task"}
-                    </p>
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <Badge label={task.Status || "-"} color={getTaskStatusColor(task.Status)} />
-                      <Badge
-                        label={task.JobType || "-"}
-                        color={task.JobType === "Hardware" ? "blue" : task.JobType === "Software" ? "indigo" : "slate"}
-                      />
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {formatDuration(task.HoursTaken || 0)} / {task.HoursAllocated || "-"}
-                      </span>
-                    </div>
-                    <div className="mt-1 flex items-center justify-between gap-2">
-                      <p className="text-xs text-slate-400 dark:text-slate-500">Ref: {task.ReferenceNo || "-"}</p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500">
-                        {formatDate(task.IwdDate || task.PlannedStartDate || task.PlannedCompletionDate)}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {activeTaskLoading && (
-              <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/60 flex items-center justify-center pointer-events-none">
-                <div className="text-sm text-slate-600 dark:text-slate-300">Loading activities...</div>
-              </div>
-            )}
-          </div>
+        <div className="min-h-[360px]">
+          <RecentActivity records={records} />
         </div>
       </div>
     </Card>
