@@ -14,3 +14,4 @@ export const STATUS_COLORS = {
 };
 
 export const THEME_KEY = "ict_theme";
+export const SIDEBAR_OPEN_KEY = "ict_sidebar_open";

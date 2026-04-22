@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Menu, Sun, Moon, RefreshCw, Bell } from "lucide-react";
 import { toggleTheme, toggleSidebar } from "../../store/slices/uiSlice";
-import { selectTheme, selectLoading, selectLastFetched } from "../../store/selectors";
+import { selectTheme, selectLoading, selectLastFetched, selectSidebarOpen } from "../../store/selectors";
 import { fetchBarcodeTimes } from "../../store/slices/barcodeSlice";
 
 const Header = () => {
@@ -10,6 +10,7 @@ const Header = () => {
   const theme = useSelector(selectTheme);
   const loading = useSelector(selectLoading);
   const lastFetched = useSelector(selectLastFetched);
+  const sidebarOpen = useSelector(selectSidebarOpen);
 
   const lastFetchedStr = lastFetched
     ? new Date(lastFetched).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
@@ -21,6 +22,8 @@ const Header = () => {
       <button
         onClick={() => dispatch(toggleSidebar())}
         className="p-2 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+        title={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+        aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
       >
         <Menu size={20} />
       </button>

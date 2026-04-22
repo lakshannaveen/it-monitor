@@ -1,9 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { THEME_KEY } from "../../utils/constants";
+import { THEME_KEY, SIDEBAR_OPEN_KEY } from "../../utils/constants";
 
 const savedTheme = localStorage.getItem(THEME_KEY) || "light";
-// Open by default only on large screens
-const defaultSidebarOpen = typeof window !== "undefined" && window.innerWidth >= 1024;
+const savedSidebar = localStorage.getItem(SIDEBAR_OPEN_KEY);
+// Default open on large screens, but prefer saved user choice when available.
+const defaultSidebarOpen =
+  savedSidebar !== null
+    ? savedSidebar === "true"
+    : (typeof window !== "undefined" && window.innerWidth >= 1024);
 
 const uiSlice = createSlice({
   name: "ui",
@@ -19,9 +23,11 @@ const uiSlice = createSlice({
     },
     setSidebarOpen(state, action) {
       state.sidebarOpen = action.payload;
+      localStorage.setItem(SIDEBAR_OPEN_KEY, String(state.sidebarOpen));
     },
     toggleSidebar(state) {
       state.sidebarOpen = !state.sidebarOpen;
+      localStorage.setItem(SIDEBAR_OPEN_KEY, String(state.sidebarOpen));
     },
     setActiveJobType(state, action) {
       state.activeJobType = action.payload;

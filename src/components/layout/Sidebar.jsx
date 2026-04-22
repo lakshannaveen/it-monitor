@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { LayoutDashboard, Layers, BarChart2, Settings, ChevronRight, X } from "lucide-react";
+import { LayoutDashboard, Layers, BarChart2, Settings, ChevronRight, X, PanelLeftClose } from "lucide-react";
 import { selectSidebarOpen } from "../../store/selectors";
 import { setSidebarOpen } from "../../store/slices/uiSlice";
 
@@ -54,6 +54,18 @@ const Sidebar = () => {
           lg:top-16 lg:z-20 lg:shadow-none
         `}
       >
+        {/* Desktop quick close */}
+        <div className="hidden lg:flex justify-end px-2 pt-2">
+          <button
+            onClick={close}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition-colors"
+            aria-label="Close sidebar"
+            title="Close sidebar"
+          >
+            <PanelLeftClose size={16} />
+          </button>
+        </div>
+
         {/* Mobile-only top bar inside drawer */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-slate-200 dark:border-slate-800 lg:hidden">
           <div className="flex items-center gap-2.5">
