@@ -160,10 +160,10 @@ const TaskDetailsPage = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[380px,1fr] gap-4 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-[480px,1fr] gap-4 items-start">
         <Card className="h-full min-h-[640px] bg-gradient-to-b from-white to-slate-50/60 dark:from-slate-900 dark:to-slate-900/70">
           <div className="h-full flex flex-col items-center text-center">
-            <div className="relative w-80 h-80 rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-5xl font-bold text-slate-600 dark:text-slate-200 shrink-0 mt-4">
+            <div className="relative w-96 h-96 md:w-[26rem] md:h-[26rem] rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-6xl font-bold text-slate-600 dark:text-slate-200 shrink-0 mt-6">
               {profileImageUrl && (
                 <img
                   src={profileImageUrl}
@@ -211,8 +211,8 @@ const TaskDetailsPage = () => {
                 )}
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-white/80 dark:border-slate-700 dark:bg-slate-800/40">
-                <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+              <div className="rounded-xl border border-amber-300 bg-amber-100/80 dark:border-amber-700/60 dark:bg-amber-900/20">
+                <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-amber-800 dark:text-amber-300">
                   Other Tasks
                 </h3>
                 {otherTasks.length > 0 ? (
