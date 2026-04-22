@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Layers, Clock, Monitor } from "lucide-react";
 import Card from "../../common/Card";
 import Badge from "../../common/Badge";
+import StatsCard from "./StatsCard";
 import { barcodeService } from "../../../services/barcodeService";
 import { formatDate, formatDuration } from "../../../utils/formatters";
 
@@ -85,7 +87,7 @@ const buildPie = (segments, cx, cy, r) => {
   return slices;
 };
 
-const EmployeeStrip = ({ records = [] }) => {
+const EmployeeStrip = ({ records = [], stats = null }) => {
   const navigate = useNavigate();
   const [apiEmployees, setApiEmployees] = useState([]);
   const [imgStatus, setImgStatus] = useState({});
@@ -289,6 +291,17 @@ const EmployeeStrip = ({ records = [] }) => {
           );
         })}
       </div>
+
+      {stats && (
+        <div className="px-4 py-4 border-b border-slate-200 dark:border-slate-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatsCard label="Total Records" value={stats.total} icon={Layers} color="blue" sub="All job types" />
+            <StatsCard label="Hardware" value={stats.hardware} icon={Monitor} color="blue" sub="Hardware jobs" />
+            <StatsCard label="Software" value={stats.software} icon={Layers} color="indigo" sub="Software jobs" />
+            <StatsCard label="Total Hours" value={`${stats.totalHours}h`} icon={Clock} color="sky" sub="Reported hours" />
+          </div>
+        </div>
+      )}
 
       <div className="p-4 grid grid-cols-1 lg:grid-cols-[320px,1fr] gap-4">
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 bg-slate-50/70 dark:bg-slate-900/40">
