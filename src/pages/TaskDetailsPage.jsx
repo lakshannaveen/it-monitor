@@ -50,6 +50,19 @@ const TaskDetailsPage = () => {
     return parts.length > 1 ? parts.slice(1).join(" - ").trim() || "-" : text;
   };
 
+  const getRequestedByServiceNo = (value) => {
+    const text = String(value || "").trim();
+    const match = text.match(/^(\d{4,})\s*-/);
+    return match ? match[1] : null;
+  };
+
+  const getInitials = (fullName = "") => {
+    const parts = String(fullName || "").trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return "NA";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  };
+
   return (
     <div>
       <div className="mb-3">
@@ -76,29 +89,46 @@ const TaskDetailsPage = () => {
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="text-left text-xs text-slate-500 uppercase tracking-wider">
-                  <th className="px-4 py-3">Task</th>
                   <th className="px-4 py-3">Requested By</th>
-                  <th className="px-4 py-3">Job Type</th>
-                  <th className="px-4 py-3">Reference</th>
-                  <th className="px-4 py-3 whitespace-nowrap">Planned</th>
-                  <th className="px-4 py-3 whitespace-nowrap">Hours</th>
+                  <th className="px-4 py-3">Task</th>
+                  <th className="px-4 py-3 whitespace-nowrap">All Hours</th>
+                  <th className="px-4 py-3 whitespace-nowrap">Actual Hours</th>
                   <th className="px-4 py-3">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {tasks.map((t, i) => (
                   <tr key={i} className="bg-white dark:bg-slate-800">
+                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
+                      <div className="flex items-start gap-3">
+                        <div className="relative w-9 h-9 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[11px] font-semibold text-slate-600 dark:text-slate-200 shrink-0">
+                          {getRequestedByServiceNo(t.RequestedBy) && (
+                            <img
+                              src={barcodeService.getUserImageUrl(getRequestedByServiceNo(t.RequestedBy))}
+                              alt={getRequestedByName(t.RequestedBy)}
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                              }}
+                              className="absolute inset-0 w-full h-full object-cover"
+                            />
+                          )}
+                          <span>{getInitials(getRequestedByName(t.RequestedBy))}</span>
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-medium text-slate-700 dark:text-slate-200 truncate">
+                            {getRequestedByName(t.RequestedBy)}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
                     <td className="px-4 py-4 align-top">
                       <div className="font-medium text-slate-800 dark:text-slate-100">{t.Task || "Untitled task"}</div>
                     </td>
-                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">{getRequestedByName(t.RequestedBy)}</td>
-                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">{t.JobType || "-"}</td>
-                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">{t.ReferenceNo || "-"}</td>
-                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                      {t.PlannedStartDate || "-"} &rarr; {t.PlannedCompletionDate || "-"}
+                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap tabular-nums">
+                      {t.HoursAllocated || "-"}
                     </td>
                     <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap tabular-nums">
-                      {t.HoursTaken || 0} / {t.HoursAllocated || "-"}
+                      {t.HoursTaken || 0}
                     </td>
                     <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
                       {t.Status ? <Badge label={t.Status} color={getStatusColor(t.Status)} /> : "-"}
