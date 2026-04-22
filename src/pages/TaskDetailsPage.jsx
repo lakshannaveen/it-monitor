@@ -48,6 +48,11 @@ const TaskDetailsPage = () => {
     return s.includes("complete") || s.includes("done") || s.includes("finish");
   };
 
+  const isInProgressStatus = (status) => {
+    const s = String(status || "").toLowerCase();
+    return s.includes("progress") || s.includes("active") || s.includes("ongoing");
+  };
+
   const getRequestedByName = (value) => {
     const text = String(value || "").trim();
     if (!text) return "-";
@@ -69,6 +74,59 @@ const TaskDetailsPage = () => {
   };
 
   const visibleTasks = tasks.filter((t) => !isCompletedStatus(t.Status));
+  const inProgressTasks = visibleTasks.filter((t) => isInProgressStatus(t.Status));
+  const otherTasks = visibleTasks.filter((t) => !isInProgressStatus(t.Status));
+
+  const renderTable = (list) => (
+    <div className="overflow-x-auto">
+      <table className="min-w-full text-sm">
+        <thead>
+          <tr className="text-left text-xs text-slate-500 uppercase tracking-wider">
+            <th className="px-4 py-3">Requested By</th>
+            <th className="px-4 py-3">Task</th>
+            <th className="px-4 py-3 whitespace-nowrap">All Hours</th>
+            <th className="px-4 py-3 whitespace-nowrap">Actual Hours</th>
+            <th className="px-4 py-3">Status</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+          {list.map((t, i) => (
+            <tr key={i} className="bg-white dark:bg-slate-800">
+              <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
+                <div className="flex items-start">
+                  <div className="relative w-9 h-9 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[11px] font-semibold text-slate-600 dark:text-slate-200 shrink-0">
+                    {getRequestedByServiceNo(t.RequestedBy) && (
+                      <img
+                        src={barcodeService.getUserImageUrl(getRequestedByServiceNo(t.RequestedBy))}
+                        alt={getRequestedByName(t.RequestedBy)}
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    )}
+                    <span>{getInitials(getRequestedByName(t.RequestedBy))}</span>
+                  </div>
+                </div>
+              </td>
+              <td className="px-4 py-4 align-top">
+                <div className="font-medium text-slate-800 dark:text-slate-100">{t.Task || "Untitled task"}</div>
+              </td>
+              <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap tabular-nums">
+                {t.HoursAllocated || "-"}
+              </td>
+              <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap tabular-nums">
+                {t.HoursTaken || 0}
+              </td>
+              <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
+                {t.Status ? <Badge label={t.Status} color={getStatusColor(t.Status)} /> : "-"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 
   return (
     <div>
@@ -92,53 +150,28 @@ const TaskDetailsPage = () => {
             No tasks found.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs text-slate-500 uppercase tracking-wider">
-                  <th className="px-4 py-3">Requested By</th>
-                  <th className="px-4 py-3">Task</th>
-                  <th className="px-4 py-3 whitespace-nowrap">All Hours</th>
-                  <th className="px-4 py-3 whitespace-nowrap">Actual Hours</th>
-                  <th className="px-4 py-3">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {visibleTasks.map((t, i) => (
-                  <tr key={i} className="bg-white dark:bg-slate-800">
-                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
-                      <div className="flex items-start">
-                        <div className="relative w-9 h-9 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[11px] font-semibold text-slate-600 dark:text-slate-200 shrink-0">
-                          {getRequestedByServiceNo(t.RequestedBy) && (
-                            <img
-                              src={barcodeService.getUserImageUrl(getRequestedByServiceNo(t.RequestedBy))}
-                              alt={getRequestedByName(t.RequestedBy)}
-                              onError={(e) => {
-                                e.currentTarget.style.display = "none";
-                              }}
-                              className="absolute inset-0 w-full h-full object-cover"
-                            />
-                          )}
-                          <span>{getInitials(getRequestedByName(t.RequestedBy))}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 align-top">
-                      <div className="font-medium text-slate-800 dark:text-slate-100">{t.Task || "Untitled task"}</div>
-                    </td>
-                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap tabular-nums">
-                      {t.HoursAllocated || "-"}
-                    </td>
-                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap tabular-nums">
-                      {t.HoursTaken || 0}
-                    </td>
-                    <td className="px-4 py-4 align-top text-slate-600 dark:text-slate-300">
-                      {t.Status ? <Badge label={t.Status} color={getStatusColor(t.Status)} /> : "-"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-6">
+            <div>
+              <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                In Progress
+              </h3>
+              {inProgressTasks.length > 0 ? (
+                renderTable(inProgressTasks)
+              ) : (
+                <div className="px-4 pb-4 text-sm text-slate-500 dark:text-slate-400">No in-progress tasks.</div>
+              )}
+            </div>
+
+            <div className="border-t border-slate-200 dark:border-slate-800">
+              <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                Other Tasks
+              </h3>
+              {otherTasks.length > 0 ? (
+                renderTable(otherTasks)
+              ) : (
+                <div className="px-4 pb-4 text-sm text-slate-500 dark:text-slate-400">No other tasks.</div>
+              )}
+            </div>
           </div>
         )}
       </Card>
