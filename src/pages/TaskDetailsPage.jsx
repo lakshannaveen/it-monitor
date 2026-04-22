@@ -12,6 +12,7 @@ const TaskDetailsPage = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isAvailable, setIsAvailable] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -30,6 +31,27 @@ const TaskDetailsPage = () => {
     };
     load();
     return () => (mounted = false);
+  }, [serviceNo]);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadAvailability = async () => {
+      if (!serviceNo) {
+        setIsAvailable(null);
+        return;
+      }
+      try {
+        const result = await barcodeService.getAvailability(serviceNo);
+        const available = String((result && result.Status) || "").toLowerCase().includes("available");
+        if (mounted) setIsAvailable(available);
+      } catch (e) {
+        if (mounted) setIsAvailable(false);
+      }
+    };
+    loadAvailability();
+    return () => {
+      mounted = false;
+    };
   }, [serviceNo]);
 
   const getStatusColor = (status) => {
@@ -153,6 +175,12 @@ const TaskDetailsPage = () => {
                 />
               )}
               <span>{getInitials(name || serviceNo)}</span>
+              <span
+                className={`absolute bottom-3 right-3 w-4 h-4 rounded-full ring-2 ring-white dark:ring-slate-900 ${
+                  isAvailable ? "bg-green-400" : "bg-slate-400"
+                }`}
+                title={isAvailable ? "Available" : "Not available"}
+              />
             </div>
           </div>
         </Card>
