@@ -225,7 +225,7 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
               }}
               className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1.5 text-xs font-medium border transition-colors whitespace-nowrap cursor-pointer ${
                 isActive
-                  ? "bg-blue-600 border-blue-600 text-white"
+                  ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300"
                   : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60"
               }`}
             >
