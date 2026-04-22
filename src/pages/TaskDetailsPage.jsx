@@ -155,7 +155,7 @@ const TaskDetailsPage = () => {
   return (
     <div>
       <div className="mb-4">
-        <p className="text-2xl font-semibold text-slate-800 dark:text-slate-100">
+        <p className="text-4xl md:text-5xl font-semibold text-slate-800 dark:text-slate-100 tracking-tight">
           {profileLabel}
         </p>
       </div>
