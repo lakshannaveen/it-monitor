@@ -23,7 +23,7 @@ const Layout = ({ children }) => {
         className={`
           pt-16 transition-all duration-300
           ml-0
-          ${sidebarOpen ? "lg:ml-64" : "lg:ml-0"}
+          ${sidebarOpen ? "lg:ml-64" : "lg:ml-20"}
         `}
       >
         <div className="p-4 sm:p-5 md:p-7 max-w-7xl mx-auto">

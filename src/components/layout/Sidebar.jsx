@@ -45,17 +45,18 @@ const Sidebar = () => {
       {/* Sidebar panel */}
       <aside
         className={`
-          fixed top-0 left-0 bottom-0 z-50 w-64 flex flex-col
+          fixed top-0 left-0 bottom-0 z-50 flex flex-col
           bg-white dark:bg-slate-900
           border-r border-slate-200 dark:border-slate-800
           shadow-2xl
-          transition-transform duration-300 ease-in-out
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
-          lg:top-16 lg:z-20 lg:shadow-none
+          transition-all duration-300 ease-in-out
+          ${isOpen ? "translate-x-0 w-64" : "-translate-x-full w-64"}
+          lg:translate-x-0 lg:top-16 lg:z-20 lg:shadow-none
+          ${isOpen ? "lg:w-64" : "lg:w-20"}
         `}
       >
         {/* Desktop quick close */}
-        <div className="hidden lg:flex justify-end px-2 pt-2">
+        <div className={`hidden lg:flex px-2 pt-2 ${isOpen ? "justify-end" : "justify-center opacity-0 pointer-events-none"}`}>
           <button
             onClick={close}
             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition-colors"
@@ -96,17 +97,19 @@ const Sidebar = () => {
                   end={to === "/"}
                   onClick={() => { if (window.innerWidth < 1024) close(); }}
                   className={({ isActive }) => `
-                    flex items-center gap-3 px-3 py-2.5 rounded-lg
+                    flex items-center gap-3 py-2.5 rounded-lg
                     text-sm font-medium transition-all duration-150
+                    ${isOpen ? "px-3 lg:px-3 justify-start" : "px-3 lg:px-2 lg:justify-center"}
                     ${isActive
                       ? "bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400"
                       : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"
                     }
                   `}
+                  title={!isOpen ? label : undefined}
                 >
                   <Icon size={18} className="shrink-0" />
-                  <span className="flex-1 truncate">{label}</span>
-                  <ChevronRight size={14} className="opacity-30" />
+                  <span className={`truncate ${isOpen ? "flex-1" : "lg:hidden"}`}>{label}</span>
+                  <ChevronRight size={14} className={`opacity-30 ${isOpen ? "" : "lg:hidden"}`} />
                 </NavLink>
               </li>
             ))}
@@ -115,8 +118,8 @@ const Sidebar = () => {
 
         {/* Footer */}
         <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800">
-          <p className="text-xs text-slate-400 dark:text-slate-600">ICT Progress Monitor</p>
-          <p className="text-xs text-slate-300 dark:text-slate-700 mt-0.5">v1.0.0</p>
+          <p className={`text-xs text-slate-400 dark:text-slate-600 ${isOpen ? "" : "hidden lg:hidden"}`}>ICT Progress Monitor</p>
+          <p className={`text-xs text-slate-300 dark:text-slate-700 mt-0.5 ${isOpen ? "" : "hidden lg:hidden"}`}>v1.0.0</p>
         </div>
       </aside>
     </>
