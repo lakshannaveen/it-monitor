@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Menu, Sun, Moon, RefreshCw, Bell } from "lucide-react";
+import { Menu, Sun, Moon, RefreshCw } from "lucide-react";
 import { toggleTheme, toggleSidebar } from "../../store/slices/uiSlice";
 import { selectTheme, selectLoading, selectLastFetched, selectSidebarOpen } from "../../store/selectors";
 import { fetchBarcodeTimes } from "../../store/slices/barcodeSlice";
@@ -56,11 +56,6 @@ const Header = () => {
         <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
       </button>
 
-      {/* Notification placeholder */}
-      <button className="p-2 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 transition-colors">
-        <Bell size={18} />
-      </button>
-
       {/* Theme toggle */}
       <button
         onClick={() => dispatch(toggleTheme())}
@@ -70,8 +65,11 @@ const Header = () => {
         {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
       </button>
 
-      {/* Avatar */}
-      <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-semibold ml-1">
+      {/* Logged user (display only) */}
+      <div
+        className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-semibold ml-1 select-none cursor-default"
+        title="Logged user"
+      >
         AD
       </div>
     </header>
