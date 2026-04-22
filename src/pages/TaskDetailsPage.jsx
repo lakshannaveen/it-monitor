@@ -200,8 +200,8 @@ const TaskDetailsPage = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="rounded-xl border border-slate-200 bg-white/80 dark:border-slate-700 dark:bg-slate-800/40">
-                <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+              <div className="rounded-xl border border-lime-300 bg-lime-100/80 dark:border-lime-700/60 dark:bg-lime-900/20">
+                <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-lime-800 dark:text-lime-300">
                   In Progress
                 </h3>
                 {inProgressTasks.length > 0 ? (
