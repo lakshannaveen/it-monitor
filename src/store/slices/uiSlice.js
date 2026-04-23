@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { THEME_KEY, SIDEBAR_OPEN_KEY } from "../../utils/constants";
 
-const savedTheme = localStorage.getItem(THEME_KEY) || "light";
+const savedTheme = localStorage.getItem(THEME_KEY) || "dark";
 const savedSidebar = localStorage.getItem(SIDEBAR_OPEN_KEY);
 // Default open on large screens, but prefer saved user choice when available.
 const defaultSidebarOpen =
