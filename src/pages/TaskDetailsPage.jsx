@@ -179,10 +179,10 @@ const TaskDetailsPage = () => {
                   {t.Task || "Untitled task"}
                 </div>
                 {compact && (
-                  <div className="absolute bottom-3 right-3 text-xs text-slate-500 dark:text-slate-400 font-medium tabular-nums text-right">
-                    <div className="leading-tight text-sm font-semibold text-slate-700 dark:text-slate-200">{t.HoursTaken || 0}</div>
+                  <div className="absolute bottom-3 right-3 font-medium tabular-nums text-right">
+                    <div className="text-sm leading-tight font-semibold text-slate-700 dark:text-slate-200">{t.HoursTaken || 0}</div>
                     <div className="h-[1px] bg-black my-1 w-6 mx-auto" />
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">{t.HoursAllocated || "-"}</div>
+                    <div className="text-sm leading-tight text-slate-500 dark:text-slate-400">{t.HoursAllocated || "-"}</div>
                   </div>
                 )}
               </td>
