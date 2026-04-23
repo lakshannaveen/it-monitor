@@ -40,6 +40,15 @@ const getInitials = (name = "") => {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 };
 
+const formatName = (n = "") => {
+  if (!n) return "";
+  return n
+    .trim()
+    .split(/\s+/)
+    .map((p) => (p ? p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() : ""))
+    .join(" ");
+};
+
 const isOnline = (name, records) => {
   const today = new Date();
   const threeDays = 3 * 24 * 60 * 60 * 1000;
@@ -243,7 +252,8 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
 
       <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2 overflow-x-auto scrollbar-thin">
         {employees.map((emp, idx) => {
-          const name = emp?.Name || "";
+          const rawName = emp?.Name || "";
+          const name = formatName(rawName);
           const svc = emp?.Service_No;
           const isActive = selectedIndex === idx;
           const isAvailable = Object.prototype.hasOwnProperty.call(availability, svc) ? availability[svc] : isOnline(name, records);
@@ -325,7 +335,7 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
             {activeEmployee?.Service_No && (
               <button
                 type="button"
-                onClick={() => navigate(`/tasks/${activeEmployee.Service_No}`, { state: { name: activeEmployee?.Name || "" } })}
+                onClick={() => navigate(`/tasks/${activeEmployee.Service_No}`, { state: { name: formatName(activeEmployee?.Name || "") } })}
                 className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
               >
                 Open tasks
