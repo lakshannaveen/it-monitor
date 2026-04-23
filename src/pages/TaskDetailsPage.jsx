@@ -208,7 +208,7 @@ const TaskDetailsPage = () => {
       <div className="grid grid-cols-1 xl:grid-cols-[700px,1fr] gap-4 items-start">
         <Card className="h-full min-h-[640px] bg-gradient-to-b from-white to-slate-50/60 dark:from-slate-900 dark:to-slate-900/70">
           <div className="h-full flex flex-col items-center text-center">
-            <div className="relative w-[36rem] h-[36rem] md:w-[40rem] md:h-[40rem] rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-7xl font-bold text-slate-600 dark:text-slate-200 shrink-0 mt-8">
+            <div className="relative w-[28rem] h-[28rem] md:w-[32rem] md:h-[32rem] rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-6xl font-bold text-slate-600 dark:text-slate-200 shrink-0 mt-8">
               {profileImageUrl && (
                 <img
                   src={profileImageUrl}
