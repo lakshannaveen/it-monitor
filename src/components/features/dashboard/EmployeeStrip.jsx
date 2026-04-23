@@ -254,6 +254,7 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
         {employees.map((emp, idx) => {
           const rawName = emp?.Name || "";
           const name = formatName(rawName);
+          const firstName = (name || "").split(/\s+/)[0] || name;
           const svc = emp?.Service_No;
           const isActive = selectedIndex === idx;
           const isAvailable = Object.prototype.hasOwnProperty.call(availability, svc) ? availability[svc] : isOnline(name, records);
@@ -311,7 +312,7 @@ const EmployeeStrip = ({ records = [], stats = null }) => {
                 </span>
               </button>
               <span className={`w-2 h-2 rounded-full ${isAvailable ? "bg-green-400" : "bg-slate-400"}`} />
-              {name}
+              {firstName}
             </div>
           );
         })}
