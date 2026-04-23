@@ -166,7 +166,7 @@ const TaskDetailsPage = () => {
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
                         }}
-                        className="absolute inset-0 w-full h-full object-contain"
+                        className="absolute inset-0 w-full h-full object-cover object-center"
                       />
                     )}
                     <span>{getInitials(getRequestedByName(t.RequestedBy))}</span>
