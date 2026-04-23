@@ -32,15 +32,24 @@ const parseServiceNo = (value) => {
   return match ? match[1] : null;
 };
 
-const getRecordServiceNo = (record = {}) =>
-  record.incharge ||
-  record.officerincharge ||
-  record.OfficerIncharge ||
-  record.serviceNo ||
-  record.Service_No ||
-  parseServiceNo(record.requester) ||
-  parseServiceNo(record.officer) ||
-  null;
+const getRecordServiceNo = (record = {}) => {
+  // Prefer service number from RequestedBy/requestedBy/requester (requester's photo)
+  const parsedFromRequested = parseServiceNo(record.RequestedBy || record.requestedBy || record.requester || "");
+  if (parsedFromRequested) return parsedFromRequested;
+
+  // Then prefer explicit numeric fields for assignee/incharge
+  if (record.serviceNo) return String(record.serviceNo);
+  if (record.Service_No) return String(record.Service_No);
+  if (record.incharge) return String(record.incharge);
+  if (record.officerincharge) return String(record.officerincharge);
+  if (record.OfficerIncharge) return String(record.OfficerIncharge);
+
+  // Finally try other fields like officer
+  const parsedFromOfficer = parseServiceNo(record.officer || "");
+  if (parsedFromOfficer) return parsedFromOfficer;
+
+  return null;
+};
 
 const Avatar = ({ name, serviceNo, size = "sm" }) => {
   const [from, to] = getAvatarColor(name);
@@ -81,10 +90,23 @@ const getRecordTime = (record) => {
   return Number.isFinite(ts) ? ts : 0;
 };
 
+const parseNameFromField = (value) => {
+  if (!value) return null;
+  const s = String(value).trim();
+  // common format: "12345 - NAME" or "12345- NAME"
+  const parts = s.split(/-\s*/);
+  if (parts.length >= 2) return parts.slice(1).join("-").trim();
+  // fallback: remove leading numbers
+  return s.replace(/^\s*\d+\s*-?\s*/, "");
+};
+
 const groupByEmployee = (records) => {
   const map = {};
   records.filter(isInProgress).forEach((record) => {
-    const name = record.officer || record.requester || "Unknown";
+    // Prefer the requester/requestedBy as the primary identity (they requested the job)
+    const rawRequested = record.RequestedBy || record.requestedBy || record.requester || "";
+    const parsedName = parseNameFromField(rawRequested) || record.requester || record.officer || "Unknown";
+    const name = parsedName;
     const serviceNo = getRecordServiceNo(record);
     const key = serviceNo || name;
     if (!map[key]) {
