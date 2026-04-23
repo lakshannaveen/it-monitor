@@ -177,7 +177,7 @@ const TaskDetailsPage = () => {
                   {t.Task || "Untitled task"}
                 </div>
                 {compact && (
-                  <div className="absolute top-3 right-3 text-sm text-slate-500 dark:text-slate-400 font-medium tabular-nums">
+                  <div className="absolute bottom-3 right-3 text-xs text-slate-500 dark:text-slate-400 font-medium tabular-nums">
                     {`${t.HoursAllocated || "-"} / ${t.HoursTaken || 0}`}
                   </div>
                 )}
