@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import Card from "../components/common/Card";
 import Badge from "../components/common/Badge";
+import { formatDate } from "../utils/formatters";
 import { barcodeService } from "../services/barcodeService";
 
 const TaskDetailsPage = () => {
@@ -172,18 +173,24 @@ const TaskDetailsPage = () => {
                   </div>
                 </div>
               </td>
-              <td className="px-4 py-6 align-top relative">
+              <td className={`px-4 py-6 align-top relative ${compact ? "pb-12" : ""}`}>
                 <div className={`font-medium leading-8 text-slate-800 dark:text-slate-100 ${
                   highlightRows ? "text-2xl md:text-3xl leading-10" : "text-xl"
                 }`}>
                   {t.Task || "Untitled task"}
                 </div>
                 {compact && (
-                  <div className="absolute bottom-3 right-3 font-medium tabular-nums text-right">
-                    <div className="text-sm leading-tight font-semibold text-black dark:text-black">{t.HoursTaken || 0}</div>
-                    <div className="h-[1px] bg-black my-1 w-6 mx-auto" />
-                    <div className="text-sm leading-tight text-black dark:text-black">{t.HoursAllocated || "-"}</div>
-                  </div>
+                  <>
+                    <div className="absolute bottom-3 left-3 text-sm text-black dark:text-black">
+                      {formatDate(t.PlannedStartDate)} - {formatDate(t.PlannedCompletionDate)}
+                    </div>
+
+                    <div className="absolute bottom-3 right-3 font-medium tabular-nums text-right">
+                      <div className="text-sm leading-tight font-semibold text-black dark:text-black">{t.HoursTaken || 0}</div>
+                      <div className="h-[1px] bg-black my-1 w-6 mx-auto" />
+                      <div className="text-sm leading-tight text-black dark:text-black">{t.HoursAllocated || "-"}</div>
+                    </div>
+                  </>
                 )}
               </td>
               {!compact && (
