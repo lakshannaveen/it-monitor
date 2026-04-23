@@ -129,16 +129,20 @@ const TaskDetailsPage = () => {
   const profileImageUrl = serviceNo ? barcodeService.getUserImageUrl(serviceNo) : null;
   const profileLabel = `${serviceNo} - ${name || "Unknown"}`;
 
-  const renderTable = (list, highlightRows = false) => (
+  const renderTable = (list, highlightRows = false, compact = false) => (
     <div className="overflow-x-auto">
       <table className="min-w-full text-lg">
         <thead>
           <tr className="text-base text-slate-500 uppercase tracking-wider">
             <th className="px-4 py-4 text-center whitespace-nowrap">Requested By</th>
             <th className="px-4 py-4 text-center">Task</th>
-            <th className="px-4 py-4 text-center whitespace-nowrap">Allocated Hours</th>
-            <th className="px-4 py-4 text-center whitespace-nowrap">Actual Hours</th>
-            <th className="px-4 py-4 text-center">Status</th>
+            {!compact && (
+              <>
+                <th className="px-4 py-4 text-center whitespace-nowrap">Allocated Hours</th>
+                <th className="px-4 py-4 text-center whitespace-nowrap">Actual Hours</th>
+                <th className="px-4 py-4 text-center">Status</th>
+              </>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -168,28 +172,37 @@ const TaskDetailsPage = () => {
                   </div>
                 </div>
               </td>
-              <td className="px-4 py-6 align-top">
+              <td className="px-4 py-6 align-top relative">
                 <div className="font-medium text-xl leading-8 text-slate-800 dark:text-slate-100">
                   {t.Task || "Untitled task"}
                 </div>
-              </td>
-              <td className="px-4 py-6 align-top text-center text-slate-700 dark:text-slate-200 whitespace-nowrap tabular-nums font-medium text-xl">
-                {t.HoursAllocated || "-"}
-              </td>
-              <td className="px-4 py-6 align-top text-center text-slate-700 dark:text-slate-200 whitespace-nowrap tabular-nums font-medium text-xl">
-                {t.HoursTaken || 0}
-              </td>
-              <td className="px-4 py-6 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                {t.Status ? (
-                  <Badge
-                    label={t.Status}
-                    color={getStatusColor(t.Status)}
-                    className="whitespace-nowrap text-sm md:text-base px-3 py-1.5 rounded-md font-semibold"
-                  />
-                ) : (
-                  "-"
+                {compact && (
+                  <div className="absolute top-3 right-3 text-sm text-slate-500 dark:text-slate-400 font-medium tabular-nums">
+                    {`${t.HoursAllocated || "-"} / ${t.HoursTaken || 0}`}
+                  </div>
                 )}
               </td>
+              {!compact && (
+                <>
+                  <td className="px-4 py-6 align-top text-center text-slate-700 dark:text-slate-200 whitespace-nowrap tabular-nums font-medium text-xl">
+                    {t.HoursAllocated || "-"}
+                  </td>
+                  <td className="px-4 py-6 align-top text-center text-slate-700 dark:text-slate-200 whitespace-nowrap tabular-nums font-medium text-xl">
+                    {t.HoursTaken || 0}
+                  </td>
+                  <td className="px-4 py-6 align-top text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                    {t.Status ? (
+                      <Badge
+                        label={t.Status}
+                        color={getStatusColor(t.Status)}
+                        className="whitespace-nowrap text-sm md:text-base px-3 py-1.5 rounded-md font-semibold"
+                      />
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+                </>
+              )}
             </tr>
           ))}
         </tbody>
@@ -250,7 +263,7 @@ const TaskDetailsPage = () => {
                   In Progress
                 </h3>
                 {inProgressTasks.length > 0 ? (
-                  renderTable(inProgressTasks, true)
+                  renderTable(inProgressTasks, true, true)
                 ) : (
                   <div className="px-4 pb-4 text-sm text-slate-500 dark:text-slate-400">No in-progress tasks.</div>
                 )}
