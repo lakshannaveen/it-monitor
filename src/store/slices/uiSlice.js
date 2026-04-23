@@ -3,11 +3,11 @@ import { THEME_KEY, SIDEBAR_OPEN_KEY } from "../../utils/constants";
 
 const savedTheme = localStorage.getItem(THEME_KEY) || "dark";
 const savedSidebar = localStorage.getItem(SIDEBAR_OPEN_KEY);
-// Default open on large screens, but prefer saved user choice when available.
+// Default to closed on first load, but prefer saved user choice when available.
 const defaultSidebarOpen =
   savedSidebar !== null
     ? savedSidebar === "true"
-    : (typeof window !== "undefined" && window.innerWidth >= 1024);
+    : false;
 
 const uiSlice = createSlice({
   name: "ui",
