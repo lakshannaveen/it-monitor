@@ -147,7 +147,7 @@ const TaskDetailsPage = () => {
               key={i}
               className={`${
                 highlightRows
-                  ? "bg-lime-50/90 dark:bg-lime-800/25 border-l-4 border-lime-300 dark:border-lime-400"
+                  ? "bg-lime-200 dark:bg-lime-700/40 border-l-4 border-lime-500 dark:border-lime-400"
                   : "bg-white dark:bg-slate-800"
               }`}
             >
@@ -169,7 +169,9 @@ const TaskDetailsPage = () => {
                 </div>
               </td>
               <td className="px-4 py-6 align-top">
-                <div className="font-medium text-xl leading-8 text-slate-800 dark:text-slate-100">{t.Task || "Untitled task"}</div>
+                <div className="font-medium text-xl leading-8 text-slate-800 dark:text-slate-100">
+                  {t.Task || "Untitled task"}
+                </div>
               </td>
               <td className="px-4 py-6 align-top text-center text-slate-700 dark:text-slate-200 whitespace-nowrap tabular-nums font-medium text-xl">
                 {t.HoursAllocated || "-"}
