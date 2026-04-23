@@ -175,7 +175,7 @@ const TaskDetailsPage = () => {
               </td>
               <td className={`px-4 py-6 align-top relative ${compact ? "pb-12" : ""}`}>
                 <div className={`font-medium leading-8 text-slate-800 dark:text-slate-100 ${
-                  highlightRows ? "text-2xl md:text-3xl leading-10" : "text-xl"
+                  highlightRows ? "text-2xl md:text-3xl leading-10 line-clamp-2" : "text-xl"
                 }`}>
                   {t.Task || "Untitled task"}
                 </div>
