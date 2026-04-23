@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import Card from "../components/common/Card";
 import Badge from "../components/common/Badge";
-import { formatDate } from "../utils/formatters";
+import { formatDate, formatDateISO } from "../utils/formatters";
 import { barcodeService } from "../services/barcodeService";
 
 const TaskDetailsPage = () => {
@@ -182,7 +182,9 @@ const TaskDetailsPage = () => {
                 {compact && (
                   <>
                     <div className="absolute bottom-3 left-3 text-sm text-black dark:text-white">
-                      {formatDate(t.PlannedStartDate)} - {formatDate(t.PlannedCompletionDate)}
+                      <span className="font-semibold mr-1">Start Date</span>- {formatDateISO(t.PlannedStartDate)}
+                      <span className="mx-3"> </span>
+                      <span className="font-semibold mr-1">End Date</span>- {formatDateISO(t.PlannedCompletionDate)}
                     </div>
 
                     <div className="absolute bottom-3 right-3 font-medium tabular-nums text-right">
