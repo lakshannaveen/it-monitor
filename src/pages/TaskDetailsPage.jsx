@@ -231,8 +231,8 @@ const TaskDetailsPage = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-[480px,1fr] gap-4 items-start">
         <Card padding={false} className="h-full min-h-[640px] bg-gradient-to-b from-white to-slate-50/60 dark:from-slate-900 dark:to-slate-900/70 overflow-hidden">
-          <div className="h-full flex flex-col items-center text-center p-6">
-            <div className="relative w-full max-w-[32rem] h-[28rem] md:h-[32rem] rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-6xl font-bold text-slate-600 dark:text-slate-200 shrink-0 mx-auto">
+          <div className="h-full flex flex-col items-start text-center p-4">
+            <div className="relative w-full max-w-[32rem] h-[28rem] md:h-[32rem] rounded-3xl overflow-hidden bg-transparent flex items-start justify-center self-center text-6xl font-bold text-slate-600 dark:text-slate-200 shrink-0">
               {profileImageUrl && (
                 <img
                   src={profileImageUrl}
@@ -240,7 +240,7 @@ const TaskDetailsPage = () => {
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
-                  className="absolute inset-0 w-full h-full object-contain"
+                  className="absolute inset-0 w-full h-full object-cover object-top"
                 />
               )}
               <span>{getInitials(name || serviceNo)}</span>
