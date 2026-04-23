@@ -166,7 +166,7 @@ const TaskDetailsPage = () => {
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
                         }}
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className="absolute inset-0 w-full h-full object-cover object-top"
                       />
                     )}
                     <span>{getInitials(getRequestedByName(t.RequestedBy))}</span>
@@ -240,7 +240,7 @@ const TaskDetailsPage = () => {
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover object-top"
                 />
               )}
               <span>{getInitials(name || serviceNo)}</span>
