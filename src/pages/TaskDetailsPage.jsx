@@ -181,14 +181,14 @@ const TaskDetailsPage = () => {
                 </div>
                 {compact && (
                   <>
-                    <div className="absolute bottom-3 left-3 text-sm text-black dark:text-black">
+                    <div className="absolute bottom-3 left-3 text-sm text-black dark:text-white">
                       {formatDate(t.PlannedStartDate)} - {formatDate(t.PlannedCompletionDate)}
                     </div>
 
                     <div className="absolute bottom-3 right-3 font-medium tabular-nums text-right">
-                      <div className="text-sm leading-tight font-semibold text-black dark:text-black">{t.HoursTaken || 0}</div>
-                      <div className="h-[1px] bg-black my-1 w-6 mx-auto" />
-                      <div className="text-sm leading-tight text-black dark:text-black">{t.HoursAllocated || "-"}</div>
+                      <div className="text-sm leading-tight font-semibold text-black dark:text-white">
+                        {`${t.HoursTaken || 0}/${t.HoursAllocated || "-"}`}
+                      </div>
                     </div>
                   </>
                 )}
